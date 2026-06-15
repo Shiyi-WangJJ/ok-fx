@@ -4,6 +4,7 @@ models
 out
 fonts
 configs/
+assets/screenshots/
 # Byte-compiled / optimized / DLL files
 .idea/
 __pycache__/

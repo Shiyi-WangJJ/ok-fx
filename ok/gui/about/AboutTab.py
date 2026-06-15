@@ -1,10 +1,7 @@
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QGridLayout, QWidget, QSizePolicy
-from qfluentwidgets import BodyLabel, SettingCardGroup
+from qfluentwidgets import BodyLabel
 
-from ok.gui.about.ProjectCard import ProjectCard
 from ok.gui.about.VersionCard import VersionCard
-from ok.gui.util.app import get_localized_app_config
 from ok.gui.util.pyappify_startup import get_startup_version_change
 from ok.gui.widget.Tab import Tab
 from ok.util.file import get_path_relative_to_exe
@@ -30,49 +27,6 @@ class AboutTab(Tab):
             self.add_card(self._startup_version_change_title(version_change), update_note_label)
             self.vBoxLayout.addSpacing(12)
 
-        projects = [
-            {"name": "ok-py按键精灵", "url": "https://github.com/ok-oldking/ok-py"},
-            {"name": "鸣潮", "url": "https://github.com/ok-oldking/ok-wuthering-waves"},
-            {"name": "少前2", "url": "https://github.com/ok-oldking/ok-gf2"},
-            {"name": "星痕共鸣", "url": "https://github.com/Sanheiii/ok-star-resonance"},
-            {"name": "二重螺旋", "url": "https://github.com/BnanZ0/ok-duet-night-abyss"},
-            {"name": "终末地", "url": "https://github.com/AliceJump/ok-end-field"},
-            {"name": "异环", "url": "https://github.com/BnanZ0/ok-neverness-to-everness"},
-        ]
-
-        def normalize_url(url):
-            return url.strip().lower().rstrip('/') if url else ""
-
-        links = config.get('links') or {}
-        current_github_norm = normalize_url(get_localized_app_config(links, 'github'))
-
-        filtered_projects = [p for p in projects if normalize_url(p['url']) != current_github_norm]
-
-        if filtered_projects:
-            self.group = SettingCardGroup(self.tr("Other Projects"), self)
-            
-            # --- ADD THIS LINE ---
-            # Force the SettingCardGroup to only be as tall as its contents
-            self.group.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-            
-            grid_widget = QWidget()
-            # You already have this constraint for the inner widget, which is great:
-            grid_widget.setSizePolicy(grid_widget.sizePolicy().horizontalPolicy(), QSizePolicy.Fixed)
-            
-            grid_layout = QGridLayout(grid_widget)
-            grid_layout.setContentsMargins(0, 0, 0, 0)
-            grid_layout.setHorizontalSpacing(8)
-            grid_layout.setVerticalSpacing(8)
-            grid_layout.setAlignment(Qt.AlignTop)
-
-            for i, project in enumerate(filtered_projects):
-                card = ProjectCard(project['name'], project['url'], grid_widget)
-                grid_layout.addWidget(card, i // 2, i % 2)
-
-            self.group.addSettingCard(grid_widget)
-            self.group.setContentsMargins(0, 0, 0, 0)
-            self.add_widget(self.group)
-
         if about := config.get('about'):
             about_label = BodyLabel()
             about_label.setText(about)
@@ -83,6 +37,18 @@ class AboutTab(Tab):
             self.add_widget(about_label)
 
         self.vBoxLayout.addStretch(1)
+
+        disclaimer = BodyLabel()
+        disclaimer.setText(
+            "本软件是免费开源的。如果你被收费，请立即退款。\n"
+            "请访问QQ频道或GitHub下载最新的官方版本。\n\n"
+            "本软件仅供个人使用，用于学习Python编程、计算机视觉、\n"
+            "UI自动化等。请勿将其用于任何营利性或商业用途。"
+        )
+        disclaimer.setStyleSheet("color: #ff4444; font-size: 12px;")
+        disclaimer.setWordWrap(True)
+        disclaimer.setContentsMargins(0, 12, 0, 12)
+        self.add_widget(disclaimer)
 
     def _startup_version_change_title(self, version_change):
         if version_change.action == "update":

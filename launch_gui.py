@@ -1,10 +1,14 @@
+import os
 from ok import OK
+
+# PyAppify 打包后是 Release 模式，本地开发是 Debug 模式
+is_release = bool(os.environ.get("PYAPPIFY_APP_VERSION"))
 
 config = {
     "use_gui": True,
-    "debug": True,
+    "debug": not is_release,  # 本地 True，发布 False
     "gui_title": "ok-fx",
-    "gui_icon": ":/icon/icon.ico",
+    "gui_icon": ":/icon.ico",
     "version": "1.0.0",
     "check_mutex": False,
     "onetime_task_interval": 2,  # 任务间间隔(秒)

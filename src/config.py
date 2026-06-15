@@ -4,7 +4,7 @@ config = {
     "use_gui": False,
     "debug": False,
     "gui_title": "ok-fx",
-    "gui_icon": ":/icon/icon.ico",
+    "gui_icon": ":/icon.ico",
     "version": "1.0.0",
     "check_mutex": False,
     "onetime_task_interval": 2,

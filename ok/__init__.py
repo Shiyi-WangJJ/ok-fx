@@ -93,7 +93,17 @@ class App:
         self.overlay_window = None
         self.main_window = None
         self.exit_event = exit_event
-        self.icon = QIcon(get_path_relative_to_exe(config.get('gui_icon')) or ":/icon/icon.ico")
+        self.icon = QIcon(get_path_relative_to_exe(config.get('gui_icon')) or ":/icon.ico")
+        self.app.setWindowIcon(self.icon)
+
+        # 让 Windows 任务栏也显示自定义图标（而非 python.exe 图标）
+        try:
+            import ctypes
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
+                config.get('gui_title', 'ok-fx')
+            )
+        except Exception:
+            pass
 
         from ok.gui.StartController import StartController
         self.start_controller = StartController(self.config, exit_event)

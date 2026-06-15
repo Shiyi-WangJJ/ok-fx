@@ -181,3 +181,24 @@ def create_non_black_mask(image):
     else:
         raise ValueError("Input image must be Grayscale (2D) or BGR/BGRA (3D)")
     return mask
+
+
+def crop_white_outer(image, x1, y1, x2, y2):
+    """
+    保留原图完整尺寸，将 bbox 外围全部填充为白色，只保留框内原图。
+
+    Args:
+        image: OpenCV BGR 图像 (numpy array)
+        x1, y1: bbox 左上角坐标
+        x2, y2: bbox 右下角坐标
+
+    Returns:
+        白底 + 框内原图（与原图同尺寸）
+    """
+    h, w = image.shape[:2]
+    x1, y1 = max(0, int(x1)), max(0, int(y1))
+    x2, y2 = min(w, int(x2)), min(h, int(y2))
+
+    white_bg = np.full_like(image, 255)
+    white_bg[y1:y2, x1:x2] = image[y1:y2, x1:x2]
+    return white_bg

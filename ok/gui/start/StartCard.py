@@ -19,7 +19,7 @@ class StartCard(SettingCard):
 
     def __init__(self, exit_event):
         from PySide6.QtGui import QIcon
-        icon = QIcon(og.config.get('gui_icon') or ":/icon/icon.ico")
+        icon = QIcon(og.config.get('gui_icon') or ":/icon.ico")
         super().__init__(icon, og.app.title, og.app.version)
         self.basic_options = og.executor.basic_options
 
