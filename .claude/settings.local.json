@@ -11,7 +11,8 @@
       "Bash(python3.12 --version)",
       "Bash(D:/claude/ok-script/venv/Scripts/python.exe --version)",
       "WebSearch",
-      "Bash(./venv/Scripts/python.exe main.py)"
+      "Bash(./venv/Scripts/python.exe main.py)",
+      "Bash(./venv/Scripts/python.exe -c \"import get_pypi_latest_version; print\\('OK'\\)\")"
     ]
   }
 }
