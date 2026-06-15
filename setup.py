@@ -26,12 +26,13 @@ setuptools.setup(
     url="https://github.com/ok-oldking/ok-script",
     packages=setuptools.find_packages(exclude=['tests', 'docs']),
     include_package_data=True,
+    license="MIT",
     classifiers=[
         "Programming Language :: Python :: 3",
         "Intended Audience :: Developers",
-        "License :: OSI Approved :: MIT License",
         "Operating System :: Microsoft :: Windows",
     ],
+    scripts=["launch_gui.py", "run.py"],
     install_requires=[
         'pywin32>=306',
         'pyappify>=1.0.5',
@@ -48,6 +49,6 @@ setuptools.setup(
             'ok=ok.cli:main',
         ],
     },
-    python_requires='==3.12.*',
+    python_requires='>=3.12',
     zip_safe=False,
 )

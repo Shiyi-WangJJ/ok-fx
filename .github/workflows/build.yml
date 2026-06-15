@@ -32,12 +32,6 @@ jobs:
         run: |
           powershell -File run_tests.ps1
 
-      - name: Sync Repositories
-        uses: ok-oldking/sync-repos-action@master
-        with:
-          git_url: ${{ secrets.GIT_URL }}
-          git_token: ${{ secrets.GIT_TOKEN }}
-
       - name: Build with PyAppify Action
         id: build-app
         uses: ok-oldking/pyappify-action@master

@@ -1,0 +1,6 @@
+# 部署清单 — 控制 inline_ok_requirements 将哪些 site-packages 目录复制到项目内
+# 以 / 开头的注释行和空行会被忽略
+# 路径相对于项目根目录
+
+ok
+pyappify

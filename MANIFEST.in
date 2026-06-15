@@ -1,4 +1,10 @@
 recursive-include ok *
+graft ok_templates
+graft configs
+include launch_gui.py
+include run.py
+include deploy.txt
+include requirements.txt
 global-exclude *.pyc
 global-exclude *.log
 global-exclude *.log.*

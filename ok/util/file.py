@@ -41,8 +41,12 @@ def get_path_relative_to_exe(*files):
             return
     frozen = getattr(sys, 'frozen', False)
     if frozen:
-        # The application is running as a bundled executable
-        application_path = os.path.abspath(sys.executable)
+        # PyInstaller onefile: data files are extracted to sys._MEIPASS
+        meipass = getattr(sys, '_MEIPASS', None)
+        if meipass:
+            application_path = meipass
+        else:
+            application_path = os.path.abspath(sys.executable)
     else:
         # The application is running as a Python script
         application_path = os.path.abspath(sys.argv[0])
@@ -56,7 +60,7 @@ def get_path_relative_to_exe(*files):
     normalized_path = os.path.normpath(path)
 
     if not os.path.exists(normalized_path):
-        path = path = os.path.join(os.getcwd(), *files)
+        path = os.path.join(os.getcwd(), *files)
         normalized_path = os.path.normpath(path)
 
     return normalized_path
