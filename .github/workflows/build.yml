@@ -23,11 +23,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Inline ok-script framework
-        run: |
-          pip install ok-script
-          python -m ok.inline_ok_requirements
-
       - name: Run tests
         run: |
           powershell -File run_tests.ps1
