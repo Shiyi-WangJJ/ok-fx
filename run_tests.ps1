@@ -8,13 +8,21 @@ Write-Host ""
 
 $venvPython = ".\venv\Scripts\python.exe"
 
-if (-not (Test-Path $venvPython)) {
-    Write-Error "Virtual environment not found at $venvPython"
+if (Test-Path $venvPython) {
+    Write-Host "Using venv Python: $venvPython"
+    $python = $venvPython
+} else {
+    Write-Host "Using system Python"
+    $python = "python"
+}
+
+if (-not (Get-Command $python -ErrorAction SilentlyContinue)) {
+    Write-Error "Python not found"
     exit 1
 }
 
 Write-Host "Running tests with pytest..." -ForegroundColor Yellow
-& $venvPython -m pytest tests/ -v --tb=short 2>&1
+& $python -m pytest tests/ -v --tb=short 2>&1
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host "`n=== All tests passed ===" -ForegroundColor Green
