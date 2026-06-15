@@ -19,3 +19,4 @@ setuptools
 get-pypi-latest-version
 OpenCC==1.2.0
 wheel
+pytest
