@@ -13,10 +13,4 @@ pynput>=1.8.1
 adbutils>=2.2.1
 psutil>=6.0.0
 ok-d3dshot>=0.1.5
-mypy
-twine
-setuptools
-get-pypi-latest-version
 OpenCC==1.2.0
-wheel
-pytest

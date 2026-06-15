@@ -32,6 +32,9 @@
 ok-script/
 ├── launch_gui.py          # GUI 入口（debug=True, use_gui=True）
 ├── run.py                 # 无头入口（headless）
+├── pyappify.yml           # PyAppify 打包配置
+├── requirements.txt       # 用户运行时依赖
+├── requirements-dev.txt   # 开发依赖（mypy, pytest 等）
 ├── ok/                    # 框架核心
 │   ├── __init__.py         # OK 类、App 类、OK 初始化
 │   ├── cli.py              # CLI 入口
@@ -136,6 +139,64 @@ def _poll_and_tap(self, name, timeout=10):
 - `launch_gui.py` 没有 `if __name__ == "__main__"` 守卫，直接执行
 - 翻译文件 `zh_CN` 安装有警告，不影响使用
 - 小文字模板（如 81×31 的"12小时"）背景变化时匹配不稳定，需要多模板兜底
+
+## 打包发布
+
+### 概述
+
+使用 **PyAppify** 打包为 Windows 安装程序（`.exe`），通过 GitHub Actions 自动构建，推 `v*` tag 触发。
+
+打包产物分两种：
+- `ok-fx-win32-Global-setup.exe`（~420 MB）：完整安装包，包含 Python + 所有依赖，离线可用
+- `ok-fx-win32-online-setup.exe`（~4 MB）：在线安装包，首次运行自动下载依赖
+
+安装后体积约 1.2 GB（PySide6 占 ~634 MB，OpenCV ~108 MB，numpy ~49 MB）。
+
+### 触发方式
+
+```bash
+git tag v1.0.0 && git push origin v1.0.0
+```
+
+### 关键配置文件
+
+**`pyappify.yml`** — PyAppify 打包配置：
+```yaml
+name: "ok-fx"
+uac: true                          # 请求管理员权限
+profiles:
+  - name: "Global"
+    git_url: "https://github.com/Shiyi-WangJJ/ok-fx.git"  # 自动更新源
+    main_script: "launch_gui.py"    # 入口脚本
+    requires_python: "3.12"         # 嵌入的 Python 版本
+    requirements: "requirements.txt"
+```
+
+- `git_url` 同时用作自动更新检查地址（启动时检查最新 tag）
+- China profile 暂注释（需要 cnb.cool 镜像仓库）
+- 启用 China profile 后可打出国内版安装包
+
+**`.github/workflows/build.yml`** — CI 构建流程：
+1. Checkout → 安装 Python 3.12 → 装依赖 → 跑测试 → PyAppify 打包 → Release 发布
+2. `use_release` 指向上一个稳定 Release，复用 Rust 启动器跳过编译（加速构建）
+3. `permissions: contents: write` 必须有（否则无法创建 Release）
+
+### 依赖拆分
+
+- `requirements.txt` — 用户运行时依赖（PyAppify 打包用这个）
+- `requirements-dev.txt` — 开发/构建额外依赖（mypy, twine, pytest 等），CI 装这个
+
+### 自动更新原理
+
+PyAppify 打包的 exe 内置 `pyappify` 库，启动时从 `git_url` 检查最新 tag。检测到新版本后自动下载替换，下次启动显示更新日志（`ok/gui/util/pyappify_startup.py`）。
+
+### 常见打包问题
+
+- **pyappify.yml 缺少 main_script / requires_python** → PyAppify 报 `Invalid version format`
+- **git_url 指向不存在的仓库** → PyAppify clone 失败 401
+- **Release 403** → 缺少 `permissions: contents: write`
+- **`dist/*-setup.exe` 找不到文件** → PyAppify 输出在 `pyappify_dist/`，不是 `dist/`
+- **Node.js 20 警告** → 加 `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"`
 
 ## 环境
 

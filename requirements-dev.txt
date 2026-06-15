@@ -1,0 +1,7 @@
+-r requirements.txt
+mypy
+twine
+setuptools
+get-pypi-latest-version
+wheel
+pytest
