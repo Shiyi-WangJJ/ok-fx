@@ -2,7 +2,7 @@ name: "ok-fx"
 uac: true
 
 profiles:
-  - name: "China"
-    git_url: "https://cnb.cool/Shiyi-WangJJ/ok-fx.git"
+#  - name: "China"
+#    git_url: "https://cnb.cool/Shiyi-WangJJ/ok-fx.git"
   - name: "Global"
     git_url: "https://github.com/Shiyi-WangJJ/ok-fx.git"
