@@ -44,7 +44,6 @@ jobs:
           files: |
             pyappify_dist/*
           body: |
-            ## 更新内容
-            自动构建版本 ${{ github.ref_name }}
+            Mumu模拟器启动成功
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

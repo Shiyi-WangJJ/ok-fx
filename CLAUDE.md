@@ -197,6 +197,50 @@ PyAppify 打包的 exe 内置 `pyappify` 库，启动时从 `git_url` 检查最�
 - **Release 403** → 缺少 `permissions: contents: write`
 - **`dist/*-setup.exe` 找不到文件** → PyAppify 输出在 `pyappify_dist/`，不是 `dist/`
 - **Node.js 20 警告** → 加 `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"`
+- **use_release 报 zip not found** → 上一个 Release 缺少 `ok-fx-win32.zip`（`files` 要写 `pyappify_dist/*` 而非 `*setup.exe`）
+
+### 日常更新 vs 重新打包
+
+**不需要重新打包的情况**（大多数）：
+- 改任务脚本、修 bug、改模板图
+- 只需 `git push` + `git tag`，用户重启应用自动拉取
+
+**需要重新打包的情况**：
+- `requirements.txt` 新增/变更依赖
+- Python 版本要求变化
+- 第一次发给新用户
+
+### 白底模板
+
+原始彩色截图放在 `assets/screenshots/`（已 `.gitignore`，不提交）。提交到 git 前跑脚本生成白底版：
+
+```bash
+python scripts/whiteout_templates.py   # 从 assets/screenshots/ 读彩图 → 白底 → ok_templates/
+```
+
+脚本逻辑：读取 `coco_annotations.json` 中的 bbox，原图尺寸不变，框外填充纯白。
+
+### 应用图标
+
+- `ok/gui/icon.ico` — Qt 资源编译进 `resources.py`，窗口标题栏显示
+- `icon.ico`（根目录）— PyAppify 打包时嵌入 exe
+- 图标路径：`:/icon.ico`（Qt 资源路径，所有引用已统一）
+
+### debug/release 自动切换
+
+`launch_gui.py` 启动时检测 `PYAPPIFY_APP_VERSION` 环境变量：
+- 存在（PyAppify 打包后）→ `debug: False`，隐藏开发者工具
+- 不存在（本地开发）→ `debug: True`，显示全部面板
+
+### 关于页面
+
+修改 `ok/gui/about/AboutTab.py`：
+- 去掉了"其他项目"链接
+- 底部加了红字免责声明
+
+### 白底抠图函数
+
+`ok/util/color.py` → `crop_white_outer(image, x1, y1, x2, y2)`：保留原图尺寸，框外全白，框内原样。
 
 ## 环境
 
