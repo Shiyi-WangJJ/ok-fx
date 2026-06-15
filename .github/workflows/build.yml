@@ -37,14 +37,12 @@ jobs:
       - name: Build with PyAppify Action
         id: build-app
         uses: ok-oldking/pyappify-action@master
-        with:
-          use_release: 'https://api.github.com/repos/Shiyi-WangJJ/ok-fx/releases/tags/v1.0.6'
 
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            pyappify_dist/*setup.exe
+            pyappify_dist/*
           body: |
             ## 更新内容
             自动构建版本 ${{ github.ref_name }}
