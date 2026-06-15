@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(py -3.12 --version)",
+      "Bash(where python *)",
+      "Bash(/c/Users/34741/AppData/Local/Microsoft/WindowsApps/python *)",
+      "Read(//c/Users/34741/AppData/Local/Programs//**)",
+      "Read(//c/Program Files//**)",
+      "Bash(cmd.exe /c \"where python\")",
+      "Bash(cmd.exe /c \"python --version\")",
+      "Bash(python3.12 --version)",
+      "Bash(D:/claude/ok-script/venv/Scripts/python.exe --version)",
+      "WebSearch",
+      "Bash(./venv/Scripts/python.exe main.py)"
+    ]
+  }
+}
