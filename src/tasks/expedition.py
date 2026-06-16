@@ -73,14 +73,6 @@ class ExpeditionTask(BaseTask):
             self.log_info(f"    出征 未找到，跳过")
             return False
         self.sleep(0.5)
-        # 点出征后有确定弹窗
-        try:
-            ok_box = self.find_one("确定")
-            self.log_info(f"    确定弹窗，点击")
-            self.click_box(ok_box)
-            self.sleep(0.5)
-        except ValueError:
-            pass
         return True
 
     def run(self):

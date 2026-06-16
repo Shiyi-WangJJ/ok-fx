@@ -88,7 +88,15 @@ class DailyTask(BaseTask):
 
             # 点确定
             self._find_and_tap("确定")
-            self.sleep(2)
+
+            # 等奖励弹窗消失、卡片列表回来
+            for _ in range(40):
+                if self._any_card(done)[0]:
+                    self.sleep(1.5)  # 等过渡动画完成，同时 sleep_check 处理残留弹窗
+                    break
+                self.sleep(0.2)
+            else:
+                self.sleep(3)
 
             done.add(name)
             self.log_info(f"  {name} 完成 ({len(done)}/6)")

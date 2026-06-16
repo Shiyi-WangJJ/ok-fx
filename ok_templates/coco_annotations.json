@@ -197,6 +197,24 @@
       "file_name": "34.png",
       "width": 1920,
       "height": 1080
+    },
+    {
+      "id": 36,
+      "file_name": "36.png",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "id": 37,
+      "file_name": "37.png",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "id": 38,
+      "file_name": "38.png",
+      "width": 1920,
+      "height": 1080
     }
   ],
   "annotations": [
@@ -979,6 +997,58 @@
       ],
       "area": 5022,
       "iscrowd": 0
+    },
+    {
+      "id": 61,
+      "image_id": 36,
+      "category_id": 61,
+      "bbox": [
+        977,
+        655,
+        107,
+        59
+      ],
+      "area": 6313,
+      "iscrowd": 0
+    },
+    {
+      "id": 62,
+      "image_id": 37,
+      "category_id": 62,
+      "bbox": [
+        1430,
+        946,
+        164,
+        51
+      ],
+      "area": 8364,
+      "iscrowd": 0
+    },
+    {
+      "id": 63,
+      "image_id": 37,
+      "category_id": 63,
+      "bbox": [
+        1815,
+        944,
+        94,
+        47
+      ],
+      "area": 4418,
+      "iscrowd": 0
+    },
+    {
+      "id": 64,
+      "image_id": 38,
+      "category_id": 64,
+      "bbox": [
+        1494,
+        684,
+        97,
+        57
+      ],
+      "area": 5529,
+      "iscrowd": 0
     }
   ],
   "categories": [
@@ -1280,6 +1350,26 @@
     {
       "id": 60,
       "name": "更新确定",
+      "supercategory": ""
+    },
+    {
+      "id": 61,
+      "name": "退役",
+      "supercategory": ""
+    },
+    {
+      "id": 62,
+      "name": "退役一键选择",
+      "supercategory": ""
+    },
+    {
+      "id": 63,
+      "name": "退役确定",
+      "supercategory": ""
+    },
+    {
+      "id": 64,
+      "name": "退役选择确定",
       "supercategory": ""
     }
   ]

@@ -37,8 +37,6 @@ jobs:
       - name: Build with PyAppify Action
         id: build-app
         uses: ok-oldking/pyappify-action@master
-        with:
-          use_release: 'https://api.github.com/repos/Shiyi-WangJJ/ok-fx/releases/tags/v1.0.11'
 
       - name: Release
         uses: softprops/action-gh-release@v2
@@ -47,5 +45,9 @@ jobs:
             pyappify_dist/*
           body: |
             Mumu模拟器启动成功
+
+            ### 下载说明
+            请下载 **ok-fx-win32-Global-setup.exe**（完整安装包）。
+            不要下载 Source code 和 zip 文件。
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
