@@ -4,7 +4,7 @@ from ok import og
 
 POPUPS = ["点击继续"]
 STEPS = ["快速领取", "炼油厂", "排班", "编辑", "进行排班", "一键领取", "主页"]
-NEED_CONFIRM = {"编辑", "进行排班"}
+NEED_CONFIRM = {"编辑", "进行排班", "一键领取"}
 
 
 class OilTask(BaseTask):

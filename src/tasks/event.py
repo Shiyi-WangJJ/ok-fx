@@ -35,7 +35,7 @@ class EventTask(BaseTask):
                 return
 
     # 地狱EX 有两个版本，任意一个出现都算
-    EX_STEPS = {"地狱EX": ["地狱EX", "地狱EX2"]}
+    EX_STEPS = {"地狱EX": ["地狱EX", "地狱EX2"], "轮数设定": ["轮数设定", "轮数设定2"]}
 
     def _find_and_tap(self, name: str) -> bool:
         names = self.EX_STEPS.get(name, [name])
@@ -70,6 +70,40 @@ class EventTask(BaseTask):
             self.log_info(f"  {name} 最高置信度: {best_conf:.3f}")
         return False
 
+    # 退役后的子步骤序列
+    RETIRE_SUB_SEQUENCE = ["退役一键选择", "退役选择确定", "退役确定"]
+    RETIRE_REPEAT = 5
+
+    def _handle_retire(self) -> bool:
+        """处理退役新线路：点退役 → 5轮子步骤 → 回到主页。返回 True 表示处理成功"""
+        self.log_info("退役出现，开始退役新线路...")
+        if not self._poll_and_tap("退役", 3):
+            self.log_info("退役点击失败，跳过退役处理")
+            return False
+        self.sleep(2)
+
+        for i in range(self.RETIRE_REPEAT):
+            if self.exit_is_set():
+                return
+            self.log_info(f"  退役子步骤 第 {i+1}/{self.RETIRE_REPEAT} 轮")
+            for name in self.RETIRE_SUB_SEQUENCE:
+                if self.exit_is_set():
+                    return
+                self.log_info(f"    >> {name}")
+                if not self._poll_and_tap(name, 5):
+                    self.log_info(f"    {name} 未找到，跳过")
+                if name == "退役选择确定":
+                    self.sleep(2)  # 退役选择确定后界面切换慢，多等一会
+                self.sleep(1)
+
+        self.log_info("退役线路结束，等待主页...")
+        while not self.exit_is_set() and self.enabled:
+            if self._find_and_tap("主页"):
+                self.log_info("主页已出现，重新跑倒油流程")
+                break
+            og.device_manager.shell("input tap 355 59")
+            self.sleep(1)
+
     def run(self):
         mode = self.config.get("线路", "活动")
         if mode == "主线":
@@ -78,36 +112,64 @@ class EventTask(BaseTask):
             self._run_event()
 
     def _run_event(self):
-        for name in STEPS:
+        """倒油主流程，退役后回到主页再重新跑，直到完成"""
+        # 确认在主页：检查"商店"是否存在
+        self.log_info("确认主页...")
+        for _ in range(10):
             if self.exit_is_set():
                 return
+            try:
+                self.find_one("商店", use_gray_scale=True)
+                self.log_info("商店可见，已在主页")
+                break
+            except ValueError:
+                og.device_manager.shell("input tap 355 59")
+                self.sleep(1)
 
-            if name == "开始委托":
-                self.log_info("  检查委托完成...")
-                if self._find_and_tap("委托完成"):
+        while not self.exit_is_set() and self.enabled:
+            for name in STEPS:
+                if self.exit_is_set():
+                    return
+
+                if name == "开始委托":
+                    self.log_info("  检查委托完成...")
+                    if self._find_and_tap("委托完成"):
+                        self.sleep(0.5)
+                        for _ in range(10):
+                            if self._find_and_tap("委托完成X"):
+                                self.log_info("  已关闭委托完成X")
+                                break
+                            self.sleep(0.3)
+                        self.sleep(1)
+
+                self.log_info(f">> {name}")
+                if name in TAP_COORDS:
+                    cx, cy = TAP_COORDS[name]
+                    og.device_manager.shell(f"input tap {cx} {cy}")
+                    self.log_info(f"  坐标点击 ({cx}, {cy})")
+                    self.sleep(3)
+                elif not self._poll_and_tap(name, 10):
+                    self.log_info(f"  {name} 未找到，跳过")
+                elif name == "活动开始委托":
+                    # 活动开始委托完成后检测退役
                     self.sleep(0.5)
                     for _ in range(10):
-                        if self._find_and_tap("委托完成X"):
-                            self.log_info("  已关闭委托完成X")
+                        if self._find_and_tap("确定"):
+                            self.log_info("  已点击确定")
                             break
                         self.sleep(0.3)
-                    self.sleep(1)
-
-            self.log_info(f">> {name}")
-            if name in TAP_COORDS:
-                cx, cy = TAP_COORDS[name]
-                og.device_manager.shell(f"input tap {cx} {cy}")
-                self.log_info(f"  坐标点击 ({cx}, {cy})")
-                self.sleep(3)
-            elif not self._poll_and_tap(name, 10):
-                self.log_info(f"  {name} 未找到，跳过")
-            elif name in CONFIRM_AFTER:
-                self.sleep(0.5)
-                for _ in range(10):
-                    if self._find_and_tap("确定"):
-                        self.log_info("  已点击确定")
-                        break
-                    self.sleep(0.3)
+                    self.log_info("  检查退役...")
+                    try:
+                        self.find_one("退役", use_gray_scale=True, threshold=0.9)
+                        if self._handle_retire():
+                            break  # 退役处理完回到主页，break → while 重新跑
+                    except ValueError:
+                        pass
+            else:
+                # for 循环正常结束（没遇到退役），跳出 while
+                break
+            # 被 break 了（遇到退役），while 会继续下一轮
+            self.log_info("退役处理完毕，重新开始倒油流程...")
 
         self.log_info("等待 5s...")
         self.sleep(5)
