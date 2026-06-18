@@ -1,4 +1,7 @@
 """倒油线路（活动 / 主线 二选一）"""
+import os
+import cv2
+from datetime import datetime
 from ok.task.task import BaseTask
 from ok import og
 
@@ -160,9 +163,18 @@ class EventTask(BaseTask):
                         self.sleep(0.3)
                     self.log_info("  检查退役...")
                     try:
-                        self.find_one("退役", use_gray_scale=True, threshold=0.9)
-                        if self._handle_retire():
-                            break  # 退役处理完回到主页，break → while 重新跑
+                        boxes = self.find_feature(feature_name="退役", limit=1, use_gray_scale=True, threshold=0.9)
+                        if boxes:
+                            b = boxes[0]
+                            self.log_info(f"  ⚠ 退役匹配! conf={b.confidence:.4f} @ ({b.x},{b.y}) {b.width}x{b.height}")
+                            # 保存截图
+                            os.makedirs("logs/screenshots", exist_ok=True)
+                            ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+                            path = f"logs/screenshots/retire_{ts}_conf{b.confidence:.2f}.png"
+                            cv2.imwrite(path, self.executor.frame)
+                            self.log_info(f"  截图已保存: {path}")
+                            if self._handle_retire():
+                                break  # 退役处理完回到主页，break → while 重新跑
                     except ValueError:
                         pass
             else:

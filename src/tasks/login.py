@@ -83,18 +83,13 @@ class LoginTask(BaseTask):
             for i in range(10):
                 if not self._should_continue():
                     break
-                # 先检查有没有"更新确定"弹窗
-                ok_box = self._find_one_safe("更新确定")
-                if ok_box:
-                    self.log_info("  检测到更新确定按钮，点击")
-                    self.click_box(ok_box)
-                    self.sleep(0.5)
-                # 公告X出现先关掉，避免影响点击
-                notice_box = self._find_one_safe("公告X")
-                if notice_box:
-                    self.log_info("  检测到公告X，点击关闭")
-                    self.click_box(notice_box)
-                    self.sleep(0.5)
+                # 顺手关弹窗
+                for popup in ["更新确定", "公告X", "登录补给X"]:
+                    box = self._find_one_safe(popup)
+                    if box:
+                        self.log_info(f"  检测到{popup}，点击关闭")
+                        self.click_box(box)
+                        self.sleep(0.5)
                 og.device_manager.shell(f"input tap {cx} {cy}")
                 self.log_info(f"  [{i+1}/10]")
                 if i < 9:

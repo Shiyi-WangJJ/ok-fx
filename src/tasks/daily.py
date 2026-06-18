@@ -82,12 +82,16 @@ class DailyTask(BaseTask):
             og.device_manager.shell(f"input tap {cx} {cy}")
             self.sleep(1)
 
-            # 再点一次同位置
-            og.device_manager.shell(f"input tap {cx} {cy}")
-            self.sleep(2)  # 等系统确认弹窗
+            # 如果第一次点击就弹出确定了（上次残留），不用点第二次
+            if self._find_and_tap("确定"):
+                self.log_info("  首次点击已弹出确定，跳过第二次")
+            else:
+                # 再点一次同位置
+                og.device_manager.shell(f"input tap {cx} {cy}")
+                self.sleep(3)  # 等系统确认弹窗
+                self._find_and_tap("确定")
 
-            # 点确定
-            self._find_and_tap("确定")
+            self.sleep(3)  # 等确定生效
 
             # 等奖励弹窗消失、卡片列表回来
             for _ in range(40):

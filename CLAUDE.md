@@ -119,9 +119,11 @@ def _poll_and_tap(self, name, timeout=10):
 ```
 
 ### 添加新标注
-1. GUI → 截图测试 → 截取当前画面
+1. GUI → 截图测试 → 截取当前画面（截图自动保存到 `assets/screenshots/`）
 2. 用 X-AnyLabeling 标注 → 导出 COCO
 3. 放入 `ok_templates/`，更新 `coco_annotations.json`
+4. **每次更新标注/截图后必须跑白底**：`python scripts/whiteout_templates.py`
+   否则彩色截图直接提交会破坏模板匹配效果
 
 ## 模板匹配参数
 
