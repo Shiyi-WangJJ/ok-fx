@@ -1180,7 +1180,8 @@ class BaseTask(OCR):
             self._enabled = True
             self.info_clear()
             self.ensure_capture()
-            self.executor.interaction.on_run()
+            if self.executor.interaction is not None:
+                self.executor.interaction.on_run()
             self.executor.enqueue_onetime_task(self)
             logger.info(f'enabled task {self}')
         communicate.task.emit(self)
