@@ -3,14 +3,16 @@ import subprocess as _subprocess
 import sys, os
 
 # 全局屏蔽所有子进程的 CMD 窗口（Windows）
+# 用类封装而非函数，避免破坏 asyncio 等库对 subprocess.Popen 的子类化
 if sys.platform == 'win32':
     _CREATE_NO_WINDOW = getattr(_subprocess, 'CREATE_NO_WINDOW', 0x08000000)
     _original_popen = _subprocess.Popen
-    def _patched_popen(*args, **kwargs):
-        kwargs.setdefault('creationflags', 0)
-        kwargs['creationflags'] |= _CREATE_NO_WINDOW
-        return _original_popen(*args, **kwargs)
-    _subprocess.Popen = _patched_popen
+    class _PatchedPopen(_original_popen):
+        def __init__(self, *args, **kwargs):
+            kwargs.setdefault('creationflags', 0)
+            kwargs['creationflags'] |= _CREATE_NO_WINDOW
+            super().__init__(*args, **kwargs)
+    _subprocess.Popen = _PatchedPopen
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from ok import run_task
