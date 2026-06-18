@@ -8,6 +8,7 @@ class PopupTrigger(TriggerTask):
         self.name = "弹窗处理"
         self.description = "自动点击 点击继续"
         self.trigger_interval = 0.5
+        self.enable()  # 默认开启
 
     def trigger(self):
         for name in ["点击继续"]:
