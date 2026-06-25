@@ -221,6 +221,24 @@
       "file_name": "39.png",
       "width": 1920,
       "height": 1080
+    },
+    {
+      "id": 40,
+      "file_name": "40.png",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "id": 41,
+      "file_name": "41.png",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "id": 42,
+      "file_name": "42.png",
+      "width": 1920,
+      "height": 1080
     }
   ],
   "annotations": [
@@ -1068,6 +1086,45 @@
       ],
       "area": 6256,
       "iscrowd": 0
+    },
+    {
+      "id": 66,
+      "image_id": 40,
+      "category_id": 66,
+      "bbox": [
+        79,
+        598,
+        196,
+        85
+      ],
+      "area": 16660,
+      "iscrowd": 0
+    },
+    {
+      "id": 67,
+      "image_id": 41,
+      "category_id": 67,
+      "bbox": [
+        451,
+        263,
+        196,
+        687
+      ],
+      "area": 134652,
+      "iscrowd": 0
+    },
+    {
+      "id": 68,
+      "image_id": 42,
+      "category_id": 68,
+      "bbox": [
+        1393,
+        698,
+        109,
+        127
+      ],
+      "area": 13843,
+      "iscrowd": 0
     }
   ],
   "categories": [
@@ -1394,6 +1451,21 @@
     {
       "id": 65,
       "name": "轮数设定2",
+      "supercategory": ""
+    },
+    {
+      "id": 66,
+      "name": "每日礼包",
+      "supercategory": ""
+    },
+    {
+      "id": 67,
+      "name": "每日启航包",
+      "supercategory": ""
+    },
+    {
+      "id": 68,
+      "name": "免费购买",
       "supercategory": ""
     }
   ]

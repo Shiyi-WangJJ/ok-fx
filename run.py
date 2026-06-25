@@ -34,6 +34,7 @@ config = {
         ["src.tasks.exercise", "ExerciseTask"],
         ["src.tasks.expedition", "ExpeditionTask"],
         ["src.tasks.mission", "MissionTask"],
+        ["src.tasks.shop", "ShopTask"],
         ["src.tasks.oil", "OilTask"],
     ],
     "trigger_tasks": [

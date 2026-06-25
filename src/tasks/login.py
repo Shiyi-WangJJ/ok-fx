@@ -33,6 +33,14 @@ class LoginTask(BaseTask):
         """检查是否应该继续运行（未停止 + 未被禁用）"""
         return not self.exit_is_set() and self.enabled
 
+    def _confirm_home(self) -> bool:
+        """确认已进主页 — 商店或主页持续出现2秒才认定，防一闪而过"""
+        for _ in range(10):
+            if not self._find_one_safe("商店") and not self._find_one_safe("主页"):
+                return False
+            self.sleep(0.2)
+        return True
+
     def run(self):
         # Step 1: ADB 直接启动游戏
         self.log_info(f"Step 1: ADB 启动游戏 ({GAME_PACKAGE})")
@@ -66,9 +74,9 @@ class LoginTask(BaseTask):
                 self.log_info("  等待期间检测到公告X，点击关闭")
                 self.click_box(notice_box)
                 self.sleep(0.5)
-            # 商店出现说明已经进主页了
-            if self._find_one_safe("商店"):
-                self.log_info("  商店已出现，跳过点击屏幕")
+            # 商店/主页出现说明已经进主页了
+            if self._confirm_home():
+                self.log_info("  已进主页，跳过点击屏幕")
                 return
             self.sleep(0.3)
             waited += 0.3
@@ -77,10 +85,10 @@ class LoginTask(BaseTask):
                 self.log_info("  超时(120s)，未检测到启动16，仍然尝试点击屏幕")
 
         if self._should_continue():
-            self.log_info("  点屏幕中心 10 秒...")
-            h, w = self.executor.frame.shape[:2]
-            cx, cy = w // 2, h // 2
-            for i in range(10):
+            self.log_info("  点击出击位置 15 秒...")
+            # 出击按钮中心 (~1842, 851)
+            cx, cy = 1842, 851
+            for i in range(15):
                 if not self._should_continue():
                     break
                 # 顺手关弹窗
@@ -91,19 +99,23 @@ class LoginTask(BaseTask):
                         self.click_box(box)
                         self.sleep(0.5)
                 og.device_manager.shell(f"input tap {cx} {cy}")
-                self.log_info(f"  [{i+1}/10]")
-                if i < 9:
+                self.log_info(f"  [{i+1}/15]")
+                # 商店/主页出现就提前结束
+                if self._confirm_home():
+                    self.log_info("  已进主页，停止点击")
+                    return
+                if i < 14:
                     self.sleep(1)
-            self.log_info("  10 秒点击完成")
+            self.log_info("  15 秒点击完成")
 
         # Step 3: 关公告X — 同时检测商店，商店出现就直接结束
         self.log_info("Step 3: 关闭公告X...")
         notice_clicks = 0
         gone_count = 0
         while self._should_continue():
-            # 商店出现就表示进主页了
-            if self._find_one_safe("商店"):
-                self.log_info("  商店已出现，跳过公告")
+            # 商店/主页出现就表示进主页了
+            if self._confirm_home():
+                self.log_info("  已进主页，跳过公告")
                 return
 
             box = self._find_one_safe("公告X")
@@ -129,8 +141,8 @@ class LoginTask(BaseTask):
             for _ in range(10):
                 if not self._should_continue():
                     break
-                if self._find_one_safe("商店"):
-                    self.log_info("  商店已出现，跳过补给")
+                if self._confirm_home():
+                    self.log_info("  已进主页，跳过补给")
                     return
                 box = self._find_one_safe("登录补给X")
                 if box:
@@ -142,16 +154,14 @@ class LoginTask(BaseTask):
             else:
                 self.log_info("  已尝试关闭登录补给X")
 
-        # Step 5: 等待商店出现 — 每秒点一次屏幕中心
-        self.log_info("Step 5: 等待商店...")
+        # Step 5: 等待商店/主页出现 — 每秒点一次出击位置
+        self.log_info("Step 5: 等待商店/主页...")
         while self._should_continue():
-            box = self._find_one_safe("商店")
-            if box:
-                self.log_info("  商店已出现，登录完成!")
+            if self._confirm_home():
+                self.log_info("  已进主页，登录完成!")
                 break
-            # 点屏幕中心
-            h, w = self.executor.frame.shape[:2]
-            og.device_manager.shell(f"input tap {w // 2} {h // 2}")
+            # 点出击位置
+            og.device_manager.shell(f"input tap 1842 851")
             self.sleep(1)
         else:
             self.log_info("  [已停止]")
