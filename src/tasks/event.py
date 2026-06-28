@@ -97,7 +97,7 @@ class EventTask(BaseTask):
                     self.log_info(f"    {name} 未找到，跳过")
                 if name == "退役选择确定":
                     self.sleep(2)  # 退役选择确定后界面切换慢，多等一会
-                self.sleep(1)
+                self.sleep(3 if name == "退役确定" else 1)
 
         self.log_info("退役线路结束，等待主页...")
         while not self.exit_is_set() and self.enabled:
