@@ -1,5 +1,6 @@
 """倒油线路（活动 / 主线 二选一）"""
 import os
+import time
 import cv2
 from datetime import datetime
 from ok.task.task import BaseTask
@@ -24,10 +25,16 @@ class EventTask(BaseTask):
         self.name = "6. 倒油"
         self.description = "倒油 -> [活动 / 主线]"
         self.sleep_check_interval = 0.5
-        self.default_config = {"线路": "活动"}
+        self.default_config.update({"线路": "活动"})
         self.config_type = {
-            "线路": {"options": ["活动", "主线"]}
+            "线路": {"options": ["活动", "20-5", "20-1"]}
         }
+
+    VALID_ROUTES = ["活动", "20-5", "20-1"]
+
+    def validate_config(self, key, value):
+        if key == "线路" and value not in self.VALID_ROUTES:
+            return f"无效线路: {value}"
 
     def sleep_check(self):
         for name in POPUPS:
@@ -40,11 +47,14 @@ class EventTask(BaseTask):
     # 地狱EX 有两个版本，任意一个出现都算
     EX_STEPS = {"地狱EX": ["地狱EX", "地狱EX2"], "轮数设定": ["轮数设定", "轮数设定2"]}
 
-    def _find_and_tap(self, name: str) -> bool:
+    def _find_and_tap(self, name: str, horizontal_variance: float = 0.0,
+                      vertical_variance: float = 0.0) -> bool:
         names = self.EX_STEPS.get(name, [name])
         for n in names:
             try:
-                box = self.find_one(n, use_gray_scale=True)
+                box = self.find_one(n, use_gray_scale=True,
+                                    horizontal_variance=horizontal_variance,
+                                    vertical_variance=vertical_variance)
             except ValueError:
                 continue
             if box:
@@ -54,16 +64,21 @@ class EventTask(BaseTask):
                 return True
         return False
 
-    def _poll_and_tap(self, name: str, timeout: float = 10) -> bool:
+    def _poll_and_tap(self, name: str, timeout: float = 10,
+                      horizontal_variance: float = 0.0,
+                      vertical_variance: float = 0.0) -> bool:
         best_conf = 0
         for _ in range(int(timeout / 0.2)):
             if self.exit_is_set():
                 return False
-            if self._find_and_tap(name):
+            if self._find_and_tap(name, horizontal_variance=horizontal_variance,
+                                  vertical_variance=vertical_variance):
                 self.sleep(1)
                 return True
             try:
-                boxes = self.find_feature(feature_name=name, limit=1, use_gray_scale=True)
+                boxes = self.find_feature(feature_name=name, limit=1, use_gray_scale=True,
+                                          horizontal_variance=horizontal_variance,
+                                          vertical_variance=vertical_variance)
                 if boxes and boxes[0].confidence > best_conf:
                     best_conf = boxes[0].confidence
             except ValueError:
@@ -109,8 +124,8 @@ class EventTask(BaseTask):
 
     def run(self):
         mode = self.config.get("线路", "活动")
-        if mode == "主线":
-            self._run_main_story()
+        if mode in ("20-5", "20-1"):
+            self._run_main_story(mode)
         else:
             self._run_event()
 
@@ -196,6 +211,87 @@ class EventTask(BaseTask):
 
         self.log_info("活动完成")
 
-    def _run_main_story(self):
-        self.log_info("主线线路（占位，待补充）")
-        self.sleep(2)
+    def _run_main_story(self, level: str = "20-5"):
+        """主线线路：出击 → 主线 → [关卡] → 托管 → 主线开始托管"""
+        # 确认在主页
+        self.log_info("确认主页...")
+        for _ in range(10):
+            if self.exit_is_set():
+                return
+            try:
+                self.find_one("商店", use_gray_scale=True)
+                self.log_info("商店可见，已在主页")
+                break
+            except ValueError:
+                og.device_manager.shell("input tap 355 59")
+                self.sleep(1)
+
+        if level == "20-1":
+            self.log_info("20-1 线路（占位，待补充模板）")
+            self.sleep(2)
+            return
+
+        steps = ["出击", "主线", level, "托管", "主线开始托管"]
+        for i, name in enumerate(steps):
+            if self.exit_is_set():
+                return
+            self.log_info(f">> Step {i+1}: {name}")
+            # 关卡步骤使用全屏检索 (variance=1.0)，其余局部检索
+            if name == level:
+                found = self._poll_and_tap(name, 10,
+                                           horizontal_variance=1.0,
+                                           vertical_variance=1.0)
+            else:
+                found = self._poll_and_tap(name, 10)
+            if not found:
+                self.log_info(f"  {name} 未找到，跳过")
+
+        # 主线开始托管的确定按钮
+        self.sleep(0.5)
+        for _ in range(10):
+            if self._find_and_tap("确定"):
+                self.log_info("  已点击确定")
+                break
+            self.sleep(0.3)
+
+        # 托管中循环：处理主线托管确定 / 主线取消 / 主线X，直到"离开"出现
+        self.log_info("进入托管循环...")
+        self.sleep(3)
+        last_tap = 0
+        while not self.exit_is_set() and self.enabled:
+            # 1. "离开"出现 → 战斗结束
+            if self._find_and_tap("离开"):
+                self.log_info("检测到离开，战斗结束")
+                self.sleep(1)
+                break
+
+            # 2. 处理托管弹窗（主线取消用全屏检索）
+            for btn, fullscreen in [("主线托管确定", False), ("主线取消", True), ("主线X", False)]:
+                if fullscreen:
+                    found = self._find_and_tap(btn, horizontal_variance=1.0,
+                                               vertical_variance=1.0)
+                else:
+                    found = self._find_and_tap(btn)
+                if found:
+                    self.log_info(f"托管中按钮: {btn} -> 点击")
+                    self.sleep(1)
+                    break
+
+            # 3. 每30秒点一下主页位置 + 打日志
+            now = time.time()
+            if now - last_tap > 30:
+                og.device_manager.shell("input tap 355 59")
+                self.log_info("托管循环中，点主页，等待离开...")
+                last_tap = now
+
+            self.sleep(2)
+
+        # 离开后等主页
+        self.log_info("等待主页...")
+        while not self.exit_is_set() and self.enabled:
+            if self._find_and_tap("主页"):
+                self.log_info("主页已出现，完成")
+                break
+            self.sleep(1)
+
+        self.log_info(f"{level} 完成")

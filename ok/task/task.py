@@ -1084,7 +1084,7 @@ class BaseTask(OCR):
         self.config = None
         self.exit_after_task = False
         self.info = {}
-        self.default_config = {}
+        self.default_config = {'_auto_start': True}
         self.global_config_names = []
         self.config_description = {}
         self.config_type = {}

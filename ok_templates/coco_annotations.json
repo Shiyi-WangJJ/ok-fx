@@ -239,6 +239,48 @@
       "file_name": "42.png",
       "width": 1920,
       "height": 1080
+    },
+    {
+      "id": 43,
+      "file_name": "43.png",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "id": 44,
+      "file_name": "44.png",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "id": 45,
+      "file_name": "45.png",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "id": 46,
+      "file_name": "46.png",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "id": 47,
+      "file_name": "47.png",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "id": 48,
+      "file_name": "49.png",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "id": 49,
+      "file_name": "50.png",
+      "width": 1920,
+      "height": 1080
     }
   ],
   "annotations": [
@@ -1125,6 +1167,110 @@
       ],
       "area": 13843,
       "iscrowd": 0
+    },
+    {
+      "id": 69,
+      "image_id": 43,
+      "category_id": 69,
+      "bbox": [
+        144,
+        195,
+        125,
+        71
+      ],
+      "area": 8875,
+      "iscrowd": 0
+    },
+    {
+      "id": 70,
+      "image_id": 43,
+      "category_id": 70,
+      "bbox": [
+        1366,
+        268,
+        99,
+        43
+      ],
+      "area": 4257,
+      "iscrowd": 0
+    },
+    {
+      "id": 71,
+      "image_id": 44,
+      "category_id": 71,
+      "bbox": [
+        1182,
+        843,
+        94,
+        93
+      ],
+      "area": 8742,
+      "iscrowd": 0
+    },
+    {
+      "id": 72,
+      "image_id": 45,
+      "category_id": 72,
+      "bbox": [
+        1550,
+        905,
+        162,
+        49
+      ],
+      "area": 7938,
+      "iscrowd": 0
+    },
+    {
+      "id": 73,
+      "image_id": 46,
+      "category_id": 73,
+      "bbox": [
+        1265,
+        662,
+        109,
+        54
+      ],
+      "area": 5886,
+      "iscrowd": 0
+    },
+    {
+      "id": 74,
+      "image_id": 47,
+      "category_id": 74,
+      "bbox": [
+        957,
+        661,
+        115,
+        59
+      ],
+      "area": 6785,
+      "iscrowd": 0
+    },
+    {
+      "id": 75,
+      "image_id": 48,
+      "category_id": 75,
+      "bbox": [
+        1724,
+        11,
+        49,
+        59
+      ],
+      "area": 2891,
+      "iscrowd": 0
+    },
+    {
+      "id": 76,
+      "image_id": 49,
+      "category_id": 76,
+      "bbox": [
+        1276,
+        976,
+        81,
+        47
+      ],
+      "area": 3807,
+      "iscrowd": 0
     }
   ],
   "categories": [
@@ -1466,6 +1612,46 @@
     {
       "id": 68,
       "name": "免费购买",
+      "supercategory": ""
+    },
+    {
+      "id": 69,
+      "name": "主线",
+      "supercategory": ""
+    },
+    {
+      "id": 70,
+      "name": "20-5",
+      "supercategory": ""
+    },
+    {
+      "id": 71,
+      "name": "托管",
+      "supercategory": ""
+    },
+    {
+      "id": 72,
+      "name": "主线开始托管",
+      "supercategory": ""
+    },
+    {
+      "id": 73,
+      "name": "主线托管确定",
+      "supercategory": ""
+    },
+    {
+      "id": 74,
+      "name": "主线取消",
+      "supercategory": ""
+    },
+    {
+      "id": 75,
+      "name": "主线X",
+      "supercategory": ""
+    },
+    {
+      "id": 76,
+      "name": "离开",
       "supercategory": ""
     }
   ]

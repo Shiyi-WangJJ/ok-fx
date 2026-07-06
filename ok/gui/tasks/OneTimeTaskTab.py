@@ -95,6 +95,7 @@ class OneTimeTaskTab(TaskTab):
     def _on_auto_start_all(self):
         """全自动启动: 依次启用所有 启动=True 的任务"""
         import threading
+        import time
 
         tasks_to_run = []
         for task in og.executor.onetime_tasks:
@@ -105,9 +106,35 @@ class OneTimeTaskTab(TaskTab):
             logger.info("没有开启自动执行的任务")
             return
 
+        # 记录批次开始时间
+        batch_start = time.time()
+        batch_start_str = time.strftime('%H:%M:%S', time.localtime(batch_start))
+        task_names = [t.name for t in tasks_to_run]
+        total_count = len(tasks_to_run)
+        completed = {'count': 0}
+
+        def on_task_done(task):
+            if task in tasks_to_run:
+                completed['count'] += 1
+                if completed['count'] >= total_count:
+                    batch_end = time.time()
+                    batch_end_str = time.strftime('%H:%M:%S', time.localtime(batch_end))
+                    duration = batch_end - batch_start
+                    mins = int(duration // 60)
+                    secs = int(duration % 60)
+                    logger.info(f'[全自动] 全部 {total_count} 个任务完成 | 开始: {batch_start_str} | 结束: {batch_end_str} | 总耗时: {mins}分{secs}秒')
+                    from ok.gui.Communicate import communicate
+                    try:
+                        communicate.task_done.disconnect(on_task_done)
+                    except (TypeError, RuntimeError):
+                        pass
+
+        from ok.gui.Communicate import communicate
+        communicate.task_done.connect(on_task_done)
+
         def _run():
             og.device_manager.do_refresh(True)
-            logger.info(f"全自动启动: {[t.name for t in tasks_to_run]}")
+            logger.info(f'[全自动] 开始 {total_count} 个任务: {task_names}')
             for task in tasks_to_run:
                 if not task.enabled:
                     task.enable()

@@ -526,6 +526,13 @@ class TaskExecutor:
                         pass
                     task.run()
                     logger.debug(f'end running onetime_task {task.name}')
+                    end_time = time.time()
+                    start_time = getattr(task, 'start_time', 0)
+                    if start_time > 0:
+                        start_str = time.strftime('%H:%M:%S', time.localtime(start_time))
+                        end_str = time.strftime('%H:%M:%S', time.localtime(end_time))
+                        duration = end_time - start_time
+                        logger.info(f'{task.name} 完成 | 开始: {start_str} | 结束: {end_str} | 耗时: {duration:.1f}s')
                     prevent_sleeping(False)
                     # 任务间间隔，给游戏一点喘息时间
                     interval = self.config.get('onetime_task_interval', 0)
