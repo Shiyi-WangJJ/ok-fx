@@ -9,6 +9,10 @@
 - **改完 GUI 相关代码（`ok/gui/`、任务文件）直接重启，不用问。**
 - 重启方式：`TaskStop` 停当前进程 → `Bash launch_gui.py run_in_background=true`
 - 任务文件在 `src/tasks/` 有热加载，但 GUI 框架代码改完必须重启
+- **每次 push 完代码改动，必须打新 tag 发版**（PyAppify 按 tag 判定更新，不打 tag 用户收不到）
+  ```bash
+  git tag v1.0.XX && git push origin v1.0.XX
+  ```
 
 ## 启动方式
 
@@ -212,15 +216,22 @@ PyAppify 打包的 exe 内置 `pyappify` 库，启动时从 `git_url` 检查最�
 - Python 版本要求变化
 - 第一次发给新用户
 
-### 白底模板
+### 截图 & 白底模板工作流
 
-原始彩色截图放在 `assets/screenshots/`（已 `.gitignore`，不提交）。提交到 git 前跑脚本生成白底版：
+**每次标注后必须处理白底，否则彩色截图直接提交会破坏模板匹配。**
 
-```bash
-python scripts/whiteout_templates.py   # 从 assets/screenshots/ 读彩图 → 白底 → ok_templates/
-```
+完整流程：
+1. GUI → 截图测试 → 截取当前画面 → 截图存入 `assets/screenshots/`（原始彩图）
+2. X-AnyLabeling 标注 → 导出 COCO → 覆盖 `ok_templates/coco_annotations.json`
+3. **跑白底脚本**：`python scripts/whiteout_templates.py`
 
-脚本逻辑：读取 `coco_annotations.json` 中的 bbox，原图尺寸不变，框外填充纯白。
+脚本逻辑：读取 `assets/screenshots/` 中的彩图 + `coco_annotations.json` 的 bbox，框外填纯白，输出到 `ok_templates/` 覆盖原图。
+
+目录分工：
+- `assets/screenshots/` — 原始彩图（`.gitignore`，不提交，留档用）
+- `ok_templates/` — 白底模板 + COCO JSON（提交到 git）
+
+⚠️ **Claude 规则：每次 annotations 变更后必须自动跑白底，不需要用户提醒。** 如果 `assets/screenshots/` 缺少源图，检查 `ok_templates/` 里是否有彩图可复用为源图。
 
 ### 应用图标
 
