@@ -24,7 +24,7 @@ config = {
     "debug": not is_release,  # 本地 True，发布 False
     "gui_title": "ok-fx",
     "gui_icon": ":/icon.ico",
-    "version": "1.0.14",
+    "version": "1.0.28",
     "check_mutex": False,
     "onetime_task_interval": 2,  # 任务间间隔(秒)
     "adb": {},
