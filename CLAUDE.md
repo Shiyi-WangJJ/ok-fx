@@ -9,9 +9,9 @@
 - **改完 GUI 相关代码（`ok/gui/`、任务文件）直接重启，不用问。**
 - 重启方式：`TaskStop` 停当前进程 → `Bash launch_gui.py run_in_background=true`
 - 任务文件在 `src/tasks/` 有热加载，但 GUI 框架代码改完必须重启
-- **每次 push 完代码改动，必须打新 tag 发版**（PyAppify 按 tag 判定更新，不打 tag 用户收不到）
+- **每次提交代码改动，必须打新 tag 推送发版**（PyAppify 按 tag 判定更新，不打 tag 用户收不到，CI 也不会触发打包）。流程：commit → tag → push
   ```bash
-  git tag v1.0.XX && git push origin v1.0.XX
+  git tag v1.0.XX && git push origin master && git push origin v1.0.XX
   ```
 
 ## 启动方式

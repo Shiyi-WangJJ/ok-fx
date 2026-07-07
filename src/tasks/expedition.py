@@ -9,7 +9,7 @@ HOUR12 = ["12小时", "12小时2"]
 class ExpeditionTask(BaseTask):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.name = "7. 远征"
+        self.name = "6. 远征"
         self.description = "出击 -> 远征 -> 远征全部领取 -> 12小时 -> 远征1~4依次出征 -> 返回主页"
         self.sleep_check_interval = 0.5
 

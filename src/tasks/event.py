@@ -22,7 +22,7 @@ CONFIRM_AFTER = {"活动开始委托"}
 class EventTask(BaseTask):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.name = "6. 倒油"
+        self.name = "7. 倒油"
         self.description = "倒油 -> [活动 / 主线]"
         self.sleep_check_interval = 0.5
         self.default_config.update({"线路": "活动"})

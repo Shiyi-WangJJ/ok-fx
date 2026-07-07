@@ -33,6 +33,7 @@ config = {
         ["src.tasks.daily",    "DailyTask"],
         ["src.tasks.exercise", "ExerciseTask"],
         ["src.tasks.expedition", "ExpeditionTask"],
+        ["src.tasks.event", "EventTask"],
         ["src.tasks.mission", "MissionTask"],
         ["src.tasks.shop", "ShopTask"],
         ["src.tasks.oil", "OilTask"],
