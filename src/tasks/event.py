@@ -212,86 +212,117 @@ class EventTask(BaseTask):
         self.log_info("活动完成")
 
     def _run_main_story(self, level: str = "20-5"):
-        """主线线路：出击 → 主线 → [关卡] → 托管 → 主线开始托管"""
-        # 确认在主页
-        self.log_info("确认主页...")
-        for _ in range(10):
-            if self.exit_is_set():
-                return
-            try:
-                self.find_one("商店", use_gray_scale=True)
-                self.log_info("商店可见，已在主页")
-                break
-            except ValueError:
-                og.device_manager.shell("input tap 355 59")
-                self.sleep(1)
-
+        """主线线路：出击 → 主线 → [关卡] → 托管 → 主线开始托管。带退役处理"""
         if level == "20-1":
             self.log_info("20-1 线路（占位，待补充模板）")
             self.sleep(2)
             return
 
-        steps = ["出击", "主线", level, "托管", "主线开始托管"]
-        for i, name in enumerate(steps):
-            if self.exit_is_set():
-                return
-            self.log_info(f">> Step {i+1}: {name}")
-            # 关卡步骤使用全屏检索 (variance=1.0)，其余局部检索
-            if name == level:
-                found = self._poll_and_tap(name, 10,
-                                           horizontal_variance=1.0,
-                                           vertical_variance=1.0)
-            else:
-                found = self._poll_and_tap(name, 10)
-            if not found:
-                self.log_info(f"  {name} 未找到，跳过")
-
-        # 主线开始托管的确定按钮
-        self.sleep(0.5)
-        for _ in range(10):
-            if self._find_and_tap("确定"):
-                self.log_info("  已点击确定")
-                break
-            self.sleep(0.3)
-
-        # 托管中循环：处理主线托管确定 / 主线取消 / 主线X，直到"离开"出现
-        self.log_info("进入托管循环...")
-        self.sleep(3)
-        last_tap = 0
+        # 外层循环：退役后重新跑整条线路
         while not self.exit_is_set() and self.enabled:
-            # 1. "离开"出现 → 战斗结束
-            if self._find_and_tap("离开"):
-                self.log_info("检测到离开，战斗结束")
-                self.sleep(1)
-                break
+            # 确认在主页
+            self.log_info("确认主页...")
+            for _ in range(10):
+                if self.exit_is_set():
+                    return
+                try:
+                    self.find_one("商店", use_gray_scale=True)
+                    self.log_info("商店可见，已在主页")
+                    break
+                except ValueError:
+                    og.device_manager.shell("input tap 355 59")
+                    self.sleep(1)
 
-            # 2. 处理托管弹窗（主线取消用全屏检索）
-            for btn, fullscreen in [("主线托管确定", False), ("主线取消", True), ("主线X", False)]:
-                if fullscreen:
-                    found = self._find_and_tap(btn, horizontal_variance=1.0,
+            steps = ["出击", "主线", level, "托管", "主线开始托管"]
+            for i, name in enumerate(steps):
+                if self.exit_is_set():
+                    return
+                self.log_info(f">> Step {i+1}: {name}")
+                if name == level:
+                    found = self._poll_and_tap(name, 10,
+                                               horizontal_variance=1.0,
                                                vertical_variance=1.0)
                 else:
-                    found = self._find_and_tap(btn)
-                if found:
-                    self.log_info(f"托管中按钮: {btn} -> 点击")
-                    self.sleep(1)
+                    found = self._poll_and_tap(name, 10)
+                if not found:
+                    self.log_info(f"  {name} 未找到，跳过")
+
+            # 主线开始托管的确定按钮
+            self.sleep(0.5)
+            for _ in range(10):
+                if self._find_and_tap("确定"):
+                    self.log_info("  已点击确定")
+                    break
+                self.sleep(0.3)
+
+            # 托管中循环：处理按钮 / 退役，直到"离开"出现
+            self.log_info("进入托管循环...")
+            self.sleep(3)
+            last_tap = 0
+            retired = False
+            while not self.exit_is_set() and self.enabled:
+                # 1. "离开" 或 "主页" 出现 → 战斗结束
+                ended = False
+                for end_btn in ["离开", "主页"]:
+                    if self._find_and_tap(end_btn):
+                        self.log_info(f"检测到{end_btn}，战斗结束")
+                        self.sleep(1)
+                        ended = True
+                        break
+                if ended:
                     break
 
-            # 3. 每30秒点一下主页位置 + 打日志
-            now = time.time()
-            if now - last_tap > 30:
-                og.device_manager.shell("input tap 355 59")
-                self.log_info("托管循环中，点主页，等待离开...")
-                last_tap = now
+                # 2. 检测退役
+                try:
+                    boxes = self.find_feature(feature_name="退役", limit=1,
+                                              use_gray_scale=True, threshold=0.9)
+                    if boxes:
+                        b = boxes[0]
+                        self.log_info(f"  ⚠ 退役匹配! conf={b.confidence:.4f} @ ({b.x},{b.y}) {b.width}x{b.height}")
+                        os.makedirs("logs/screenshots", exist_ok=True)
+                        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+                        path = f"logs/screenshots/retire_{ts}_conf{b.confidence:.2f}.png"
+                        cv2.imwrite(path, self.executor.frame)
+                        self.log_info(f"  截图已保存: {path}")
+                        if self._handle_retire():
+                            retired = True
+                            break
+                except ValueError:
+                    pass
 
-            self.sleep(2)
+                # 3. 处理托管弹窗（主线取消用全屏检索）
+                for btn, fullscreen in [("主线托管确定", False), ("主线取消", True), ("主线X", False)]:
+                    if fullscreen:
+                        found = self._find_and_tap(btn, horizontal_variance=1.0,
+                                                   vertical_variance=1.0)
+                    else:
+                        found = self._find_and_tap(btn)
+                    if found:
+                        self.log_info(f"托管中按钮: {btn} -> 点击")
+                        self.sleep(1)
+                        break
 
-        # 离开后等主页
-        self.log_info("等待主页...")
-        while not self.exit_is_set() and self.enabled:
-            if self._find_and_tap("主页"):
-                self.log_info("主页已出现，完成")
-                break
-            self.sleep(1)
+                # 4. 每30秒点一下主页位置 + 打日志
+                now = time.time()
+                if now - last_tap > 30:
+                    og.device_manager.shell("input tap 355 59")
+                    self.log_info("托管循环中，点主页，等待离开...")
+                    last_tap = now
+
+                self.sleep(2)
+
+            if retired:
+                self.log_info("退役处理完毕，重新开始主线流程...")
+                continue  # 回到外层 while 重新跑
+
+            # 离开后等主页
+            if not self.exit_is_set() and self.enabled:
+                self.log_info("等待主页...")
+                while not self.exit_is_set() and self.enabled:
+                    if self._find_and_tap("主页"):
+                        self.log_info("主页已出现，完成")
+                        break
+                    self.sleep(1)
+                break  # 正常完成，退出外层 while
 
         self.log_info(f"{level} 完成")
