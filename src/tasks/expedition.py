@@ -91,7 +91,7 @@ class ExpeditionTask(BaseTask):
         self.log_info(">> 远征全部领取")
         if not self._poll_and_tap("远征全部领取", 10):
             self.log_info("  远征全部领取 未找到，跳过")
-        self.sleep(0.5)
+        self.sleep(2)
 
         # 3. 12小时（双模板，任意一个匹配即可）
         self.log_info(">> 12小时")

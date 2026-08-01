@@ -36,6 +36,7 @@ config = {
         ["src.tasks.event", "EventTask"],
         ["src.tasks.mission", "MissionTask"],
         ["src.tasks.shop", "ShopTask"],
+        ["src.tasks.weekly", "WeeklyTask"],
         ["src.tasks.oil", "OilTask"],
     ],
     "trigger_tasks": [

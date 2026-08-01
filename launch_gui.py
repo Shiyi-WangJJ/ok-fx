@@ -44,6 +44,7 @@ config = {
         ["src.tasks.event", "EventTask"],
         ["src.tasks.mission", "MissionTask"],
         ["src.tasks.shop", "ShopTask"],
+        ["src.tasks.weekly", "WeeklyTask"],
         ["src.tasks.oil", "OilTask"],
     ],
     # 后台弹窗监控（仅 点击继续，不含 确定）

@@ -281,6 +281,72 @@
       "file_name": "50.png",
       "width": 1920,
       "height": 1080
+    },
+    {
+      "id": 50,
+      "file_name": "weekly_50_0.png",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "id": 51,
+      "file_name": "weekly_51_0.png",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "id": 52,
+      "file_name": "weekly_52_1.png",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "id": 53,
+      "file_name": "weekly_53_0.png",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "id": 54,
+      "file_name": "51.png",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "id": 55,
+      "file_name": "52.png",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "id": 56,
+      "file_name": "53.png",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "id": 57,
+      "file_name": "54.png",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "id": 58,
+      "file_name": "55.png",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "id": 59,
+      "file_name": "56.png",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "id": 60,
+      "file_name": "57.png",
+      "width": 1920,
+      "height": 1080
     }
   ],
   "annotations": [
@@ -1271,6 +1337,253 @@
       ],
       "area": 3807,
       "iscrowd": 0
+    },
+    {
+      "id": 77,
+      "image_id": 50,
+      "category_id": 22,
+      "bbox": [
+        1742,
+        178,
+        162,
+        79
+      ],
+      "area": 12798,
+      "iscrowd": 0
+    },
+    {
+      "id": 78,
+      "image_id": 51,
+      "category_id": 77,
+      "bbox": [
+        26,
+        287,
+        228,
+        117
+      ],
+      "area": 26676,
+      "iscrowd": 0
+    },
+    {
+      "id": 79,
+      "image_id": 52,
+      "category_id": 78,
+      "bbox": [
+        19,
+        284,
+        238,
+        129
+      ],
+      "area": 30702,
+      "iscrowd": 0
+    },
+    {
+      "id": 80,
+      "image_id": 52,
+      "category_id": 79,
+      "bbox": [
+        1607,
+        811,
+        162,
+        114
+      ],
+      "area": 18468,
+      "iscrowd": 0
+    },
+    {
+      "id": 81,
+      "image_id": 53,
+      "category_id": 80,
+      "bbox": [
+        904,
+        356,
+        380,
+        380
+      ],
+      "area": 144400,
+      "iscrowd": 0
+    },
+    {
+      "id": 82,
+      "image_id": 53,
+      "category_id": 81,
+      "bbox": [
+        580,
+        409,
+        264,
+        266
+      ],
+      "area": 70224,
+      "iscrowd": 0
+    },
+    {
+      "id": 83,
+      "image_id": 53,
+      "category_id": 82,
+      "bbox": [
+        1340,
+        409,
+        244,
+        263
+      ],
+      "area": 64172,
+      "iscrowd": 0
+    },
+    {
+      "id": 84,
+      "image_id": 54,
+      "category_id": 83,
+      "bbox": [
+        913,
+        335,
+        339,
+        383
+      ],
+      "area": 129837,
+      "iscrowd": 0
+    },
+    {
+      "id": 85,
+      "image_id": 54,
+      "category_id": 84,
+      "bbox": [
+        1356,
+        422,
+        207,
+        222
+      ],
+      "area": 45954,
+      "iscrowd": 0
+    },
+    {
+      "id": 86,
+      "image_id": 55,
+      "category_id": 85,
+      "bbox": [
+        788,
+        494,
+        341,
+        30
+      ],
+      "area": 10230,
+      "iscrowd": 0
+    },
+    {
+      "id": 87,
+      "image_id": 56,
+      "category_id": 86,
+      "bbox": [
+        212,
+        854,
+        90,
+        81
+      ],
+      "area": 7290,
+      "iscrowd": 0
+    },
+    {
+      "id": 88,
+      "image_id": 57,
+      "category_id": 87,
+      "bbox": [
+        20,
+        187,
+        248,
+        417
+      ],
+      "area": 103416,
+      "iscrowd": 0
+    },
+    {
+      "id": 89,
+      "image_id": 56,
+      "category_id": 88,
+      "bbox": [
+        1412,
+        827,
+        304,
+        122
+      ],
+      "area": 37088,
+      "iscrowd": 0
+    },
+    {
+      "id": 90,
+      "image_id": 58,
+      "category_id": 89,
+      "bbox": [
+        9,
+        941,
+        267,
+        81
+      ],
+      "area": 21627,
+      "iscrowd": 0
+    },
+    {
+      "id": 91,
+      "image_id": 58,
+      "category_id": 90,
+      "bbox": [
+        1627,
+        948,
+        277,
+        73
+      ],
+      "area": 20221,
+      "iscrowd": 0
+    },
+    {
+      "id": 92,
+      "image_id": 59,
+      "category_id": 91,
+      "bbox": [
+        1272,
+        662,
+        107,
+        63
+      ],
+      "area": 6741,
+      "iscrowd": 0
+    },
+    {
+      "id": 93,
+      "image_id": 58,
+      "category_id": 92,
+      "bbox": [
+        1834,
+        219,
+        48,
+        59
+      ],
+      "area": 2832,
+      "iscrowd": 0
+    },
+    {
+      "id": 94,
+      "image_id": 60,
+      "category_id": 93,
+      "bbox": [
+        1793,
+        949,
+        107,
+        69
+      ],
+      "area": 7383,
+      "iscrowd": 0
+    },
+    {
+      "id": 95,
+      "image_id": 57,
+      "category_id": 94,
+      "bbox": [
+        1803,
+        920,
+        110,
+        78
+      ],
+      "area": 8580,
+      "iscrowd": 0
     }
   ],
   "categories": [
@@ -1652,6 +1965,96 @@
     {
       "id": 76,
       "name": "离开",
+      "supercategory": ""
+    },
+    {
+      "id": 77,
+      "name": "无尽海域1",
+      "supercategory": ""
+    },
+    {
+      "id": 78,
+      "name": "无尽海域2",
+      "supercategory": ""
+    },
+    {
+      "id": 79,
+      "name": "无尽海域出击",
+      "supercategory": ""
+    },
+    {
+      "id": 80,
+      "name": "31",
+      "supercategory": ""
+    },
+    {
+      "id": 81,
+      "name": "30",
+      "supercategory": ""
+    },
+    {
+      "id": 82,
+      "name": "32",
+      "supercategory": ""
+    },
+    {
+      "id": 83,
+      "name": "33",
+      "supercategory": ""
+    },
+    {
+      "id": 84,
+      "name": "34",
+      "supercategory": ""
+    },
+    {
+      "id": 85,
+      "name": "弹药不足",
+      "supercategory": ""
+    },
+    {
+      "id": 86,
+      "name": "空阵容",
+      "supercategory": ""
+    },
+    {
+      "id": 87,
+      "name": "空船",
+      "supercategory": ""
+    },
+    {
+      "id": 88,
+      "name": "起航",
+      "supercategory": ""
+    },
+    {
+      "id": 89,
+      "name": "一键移除",
+      "supercategory": ""
+    },
+    {
+      "id": 90,
+      "name": "快速选择",
+      "supercategory": ""
+    },
+    {
+      "id": 91,
+      "name": "一键移除确定",
+      "supercategory": ""
+    },
+    {
+      "id": 92,
+      "name": "弹药5",
+      "supercategory": ""
+    },
+    {
+      "id": 93,
+      "name": "一键选择确定",
+      "supercategory": ""
+    },
+    {
+      "id": 94,
+      "name": "起航2",
       "supercategory": ""
     }
   ]

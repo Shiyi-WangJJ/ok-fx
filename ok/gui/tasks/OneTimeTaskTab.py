@@ -156,11 +156,11 @@ class OneTimeTaskTab(TaskTab):
             self.removeWidget(w)
             w.deleteLater()
         self.card_widgets.clear()
-        
+
         # If we have a delete button, it's at the end. We need to keep it there.
         if hasattr(self, 'btn_layout'):
             self.vBoxLayout.removeItem(self.btn_layout)
-        
+
         self.tasks = []
         for task in og.executor.onetime_tasks:
             if not getattr(task, 'visible', True):
@@ -170,12 +170,18 @@ class OneTimeTaskTab(TaskTab):
                 self.tasks.append(task)
             elif self.group_name and task_group == self.group_name:
                 self.tasks.append(task)
-                
+
         for task in self.tasks:
             task_card = TaskCard(task, True)
             self.card_widgets.append(task_card)
-            self.vBoxLayout.addWidget(task_card) # Use vBoxLayout directly to avoid stretch issues
-            
+            self.vBoxLayout.addWidget(task_card)
+
+        # 如果任务要求隐藏自动按钮，则隐藏
+        hide_btns = any(getattr(t, 'hide_auto_buttons', False) for t in self.tasks)
+        if hide_btns:
+            self.auto_start_btn.setVisible(False)
+            self.stop_all_btn.setVisible(False)
+
         if hasattr(self, 'btn_layout'):
             self.vBoxLayout.addLayout(self.btn_layout)
 

@@ -53,7 +53,8 @@ class CocoData(TypedDict):
 
 
 def ensure_template_folder():
-    folder = os.path.join(os.getcwd(), TEMPLATE_FOLDER)
+    app_path = og.app_path if og and hasattr(og, 'app_path') else os.getcwd()
+    folder = os.path.join(app_path, TEMPLATE_FOLDER)
     if not os.path.exists(folder):
         os.makedirs(folder, exist_ok=True)
     return folder
