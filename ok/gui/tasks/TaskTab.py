@@ -75,19 +75,39 @@ class TaskTab(Tab):
             return
         if not self.task_info_table.isVisible():
             self.task_info_container.show()
+
         info = task.info
         if task.enabled:
             self.current_task_name = f": {og.app.tr(task.name)} {self.tr('Time Elapsed')}: {self.time_elapsed(task.start_time)}"
-        self.task_info_table.setRowCount(len(info))
-        for row, (key, value) in enumerate(info.items()):
+
+        # 构建表格行: info 行 + 开始/结束时间行
+        st = getattr(task, '_run_start', 0)
+        et = getattr(task, '_run_end', 0)
+        extra_rows = []
+        if st > 0:
+            extra_rows.append((self.tr("开始时间"), time.strftime('%H:%M:%S', time.localtime(st))))
+        if et > 0:
+            extra_rows.append((self.tr("结束时间"), time.strftime('%H:%M:%S', time.localtime(et))))
+
+        total_rows = len(info) + len(extra_rows)
+        self.task_info_table.setRowCount(total_rows)
+        row = 0
+        for key, value in info.items():
             if not self.task_info_table.item(row, 0):
-                item0 = self.uneditable_item()
-                self.task_info_table.setItem(row, 0, item0)
+                self.task_info_table.setItem(row, 0, self.uneditable_item())
             self.task_info_table.item(row, 0).setText(og.app.tr(key))
             if not self.task_info_table.item(row, 1):
-                item1 = self.uneditable_item()
-                self.task_info_table.setItem(row, 1, item1)
+                self.task_info_table.setItem(row, 1, self.uneditable_item())
             self.task_info_table.item(row, 1).setText(og.app.tr(value_to_string(value)))
+            row += 1
+        for key, value in extra_rows:
+            if not self.task_info_table.item(row, 0):
+                self.task_info_table.setItem(row, 0, self.uneditable_item())
+            self.task_info_table.item(row, 0).setText(key)
+            if not self.task_info_table.item(row, 1):
+                self.task_info_table.setItem(row, 1, self.uneditable_item())
+            self.task_info_table.item(row, 1).setText(value)
+            row += 1
 
     def uneditable_item(self):
         item = QTableWidgetItem()

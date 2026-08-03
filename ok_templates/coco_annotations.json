@@ -1,18 +1,6 @@
 {
   "images": [
     {
-      "id": 1,
-      "file_name": "0.png",
-      "width": 1920,
-      "height": 1080
-    },
-    {
-      "id": 2,
-      "file_name": "1.png",
-      "width": 1920,
-      "height": 1080
-    },
-    {
       "id": 3,
       "file_name": "2.png",
       "width": 1920,
@@ -347,59 +335,89 @@
       "file_name": "57.png",
       "width": 1920,
       "height": 1080
+    },
+    {
+      "id": 61,
+      "file_name": "59.png",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "id": 62,
+      "file_name": "60.png",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "id": 63,
+      "file_name": "61.png",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "id": 64,
+      "file_name": "62.png",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "id": 65,
+      "file_name": "63.png",
+      "width": 1920,
+      "height": 1080
     }
   ],
   "annotations": [
     {
       "id": 1,
-      "image_id": 1,
+      "image_id": 61,
       "category_id": 1,
       "bbox": [
-        1755,
+        1754,
         280,
-        111,
-        38
+        136,
+        39
       ],
-      "area": 4218,
+      "area": 5304,
       "iscrowd": 0
     },
     {
       "id": 2,
-      "image_id": 1,
+      "image_id": 61,
       "category_id": 2,
       "bbox": [
-        58,
-        985,
+        55,
+        981,
         70,
-        45
+        59
       ],
-      "area": 3150,
+      "area": 4130,
       "iscrowd": 0
     },
     {
       "id": 3,
-      "image_id": 1,
+      "image_id": 61,
       "category_id": 3,
       "bbox": [
-        1787,
-        816,
-        111,
-        70
+        1716,
+        821,
+        182,
+        63
       ],
-      "area": 7770,
+      "area": 11466,
       "iscrowd": 0
     },
     {
       "id": 4,
-      "image_id": 2,
+      "image_id": 61,
       "category_id": 4,
       "bbox": [
-        882,
-        99,
-        89,
-        35
+        1716,
+        638,
+        176,
+        117
       ],
-      "area": 3115,
+      "area": 20592,
       "iscrowd": 0
     },
     {
@@ -651,15 +669,15 @@
     },
     {
       "id": 24,
-      "image_id": 1,
-      "category_id": 22,
+      "image_id": 61,
+      "category_id": 40,
       "bbox": [
-        1744,
-        673,
-        127,
-        59
+        1222,
+        984,
+        65,
+        61
       ],
-      "area": 7493,
+      "area": 3965,
       "iscrowd": 0
     },
     {
@@ -859,15 +877,15 @@
     },
     {
       "id": 40,
-      "image_id": 1,
-      "category_id": 40,
+      "image_id": 62,
+      "category_id": 95,
       "bbox": [
-        1219,
-        986,
-        70,
-        42
+        881,
+        99,
+        93,
+        34
       ],
-      "area": 2940,
+      "area": 3162,
       "iscrowd": 0
     },
     {
@@ -1584,6 +1602,45 @@
       ],
       "area": 8580,
       "iscrowd": 0
+    },
+    {
+      "id": 96,
+      "image_id": 63,
+      "category_id": 96,
+      "bbox": [
+        353,
+        621,
+        178,
+        166
+      ],
+      "area": 29548,
+      "iscrowd": 0
+    },
+    {
+      "id": 97,
+      "image_id": 64,
+      "category_id": 97,
+      "bbox": [
+        1228,
+        658,
+        154,
+        67
+      ],
+      "area": 10318,
+      "iscrowd": 0
+    },
+    {
+      "id": 98,
+      "image_id": 65,
+      "category_id": 98,
+      "bbox": [
+        201,
+        172,
+        421,
+        71
+      ],
+      "area": 29891,
+      "iscrowd": 0
     }
   ],
   "categories": [
@@ -1604,7 +1661,7 @@
     },
     {
       "id": 4,
-      "name": "炼油厂",
+      "name": "活动-闲夏日记",
       "supercategory": ""
     },
     {
@@ -2055,6 +2112,26 @@
     {
       "id": 94,
       "name": "起航2",
+      "supercategory": ""
+    },
+    {
+      "id": 95,
+      "name": "炼油厂",
+      "supercategory": ""
+    },
+    {
+      "id": 96,
+      "name": "刷新次数",
+      "supercategory": ""
+    },
+    {
+      "id": 97,
+      "name": "演习挑战结束确定",
+      "supercategory": ""
+    },
+    {
+      "id": 98,
+      "name": "参与争锋PVP",
       "supercategory": ""
     }
   ]

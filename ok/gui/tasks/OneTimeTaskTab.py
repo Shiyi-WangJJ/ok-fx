@@ -56,6 +56,8 @@ class OneTimeTaskTab(TaskTab):
         """)
         self.stop_all_btn.clicked.connect(self._on_stop_all)
         self.auto_btn_layout.addWidget(self.stop_all_btn)
+        self.auto_start_btn.setVisible(False)
+        self.stop_all_btn.setVisible(False)
         self.auto_btn_layout.addStretch()
         self.vBoxLayout.addLayout(self.auto_btn_layout)
 
@@ -176,11 +178,9 @@ class OneTimeTaskTab(TaskTab):
             self.card_widgets.append(task_card)
             self.vBoxLayout.addWidget(task_card)
 
-        # 如果任务要求隐藏自动按钮，则隐藏
-        hide_btns = any(getattr(t, 'hide_auto_buttons', False) for t in self.tasks)
-        if hide_btns:
-            self.auto_start_btn.setVisible(False)
-            self.stop_all_btn.setVisible(False)
+        # 全部开始/停止按钮已移除
+        self.auto_start_btn.setVisible(False)
+        self.stop_all_btn.setVisible(False)
 
         if hasattr(self, 'btn_layout'):
             self.vBoxLayout.addLayout(self.btn_layout)

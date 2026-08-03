@@ -35,17 +35,8 @@ config = {
     },
     # 依次执行的任务（顺序 = 执行顺序, 开关控制是否参与全自动启动）
     "onetime_tasks": [
-        ["src.tasks.login", "LoginTask"],
-        ["src.tasks.oil", "OilTask"],
-        ["src.tasks.daily", "DailyTask"],
-        ["src.tasks.exercise", "ExerciseTask"],
-        ["src.tasks.arena", "ArenaTask"],
-        ["src.tasks.expedition", "ExpeditionTask"],
-        ["src.tasks.event", "EventTask"],
-        ["src.tasks.mission", "MissionTask"],
-        ["src.tasks.shop", "ShopTask"],
+        ["src.tasks.orchestrator", "DailyOrchestrator"],
         ["src.tasks.weekly", "WeeklyTask"],
-        ["src.tasks.oil", "OilTask"],
     ],
     # 后台弹窗监控（仅 点击继续，不含 确定）
     "trigger_tasks": [
