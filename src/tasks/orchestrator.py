@@ -278,7 +278,7 @@ class DailyOrchestrator(BaseTask):
                     self.sleep(0.3)
             elif not found:
                 self.log_info(f"    {name} 未找到，跳过")
-        self.sleep(2)
+        self.sleep(5)
         self._go_home()
         self.log_info("--- 领油完成 ---")
 
@@ -474,7 +474,7 @@ class DailyOrchestrator(BaseTask):
 
         self.log_info("  >> 远征全部领取")
         self._poll_and_tap("远征全部领取", 10)
-        self.sleep(2)
+        self.sleep(5)
 
         self.log_info("  >> 12小时")
         self._poll_and_tap(HOUR12, 10)
@@ -584,7 +584,7 @@ class DailyOrchestrator(BaseTask):
 
         if not self._poll_and_tap("退役", 3):
             return False
-        self.sleep(2)
+        self.sleep(5)
 
         for i in range(5):
             if self.exit_is_set():
@@ -596,10 +596,21 @@ class DailyOrchestrator(BaseTask):
                 if not self._poll_and_tap(name, 5):
                     self.log_info(f"    {name} 未找到")
                 if name == "退役选择确定":
-                    self.sleep(2)
+                    self.sleep(5)
                 self.sleep(3 if name == "退役确定" else 1)
 
         self.log_info("退役处理完毕，重新跑倒油...")
+        self.log_info("  回主页...")
+        for _ in range(30):
+            if self.exit_is_set():
+                return True
+            self._find_and_tap("主页")
+            self.sleep(0.5)
+            if self._find_one_safe("主页") is None:
+                self.log_info("  已回到主页")
+                break
+        else:
+            self.log_info("  回主页超时，继续")
         return True
 
     def _run_event_main_story(self, level: str):
@@ -672,7 +683,7 @@ class DailyOrchestrator(BaseTask):
                 if now - last_tap > 30:
                     og.device_manager.shell("input tap 355 59")
                     last_tap = now
-                self.sleep(2)
+                self.sleep(5)
 
             if retired:
                 continue
