@@ -278,7 +278,7 @@ class DailyOrchestrator(BaseTask):
                     self.sleep(0.3)
             elif not found:
                 self.log_info(f"    {name} 未找到，跳过")
-        self.sleep(5)
+        self.sleep(2)
         self._go_home()
         self.log_info("--- 领油完成 ---")
 
@@ -584,7 +584,7 @@ class DailyOrchestrator(BaseTask):
 
         if not self._poll_and_tap("退役", 3):
             return False
-        self.sleep(5)
+        self.sleep(2)
 
         for i in range(5):
             if self.exit_is_set():
@@ -596,7 +596,7 @@ class DailyOrchestrator(BaseTask):
                 if not self._poll_and_tap(name, 5):
                     self.log_info(f"    {name} 未找到")
                 if name == "退役选择确定":
-                    self.sleep(5)
+                    self.sleep(2)
                 self.sleep(3 if name == "退役确定" else 1)
 
         self.log_info("退役处理完毕，重新跑倒油...")
@@ -683,7 +683,7 @@ class DailyOrchestrator(BaseTask):
                 if now - last_tap > 30:
                     og.device_manager.shell("input tap 355 59")
                     last_tap = now
-                self.sleep(5)
+                self.sleep(2)
 
             if retired:
                 continue
