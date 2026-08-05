@@ -24,7 +24,7 @@ config = {
     "debug": not is_release,  # 本地 True，发布 False
     "gui_title": "ok-fx",
     "gui_icon": ":/icon.ico",
-    "version": "1.0.28",
+    "version": "1.0.34",
     "check_mutex": False,
     "onetime_task_interval": 2,  # 任务间间隔(秒)
     "adb": {},
@@ -32,6 +32,11 @@ config = {
         "coco_feature_json": "ok_templates/coco_annotations.json",
         "default_threshold": 0.70,
         # variance 不写=使用 OK 默认值 0.002，只在标注位置附近搜索，又快又准
+    },
+    "ocr": {
+        "default": {
+            "lib": "rapidocr",
+        },
     },
     # 依次执行的任务（顺序 = 执行顺序, 开关控制是否参与全自动启动）
     "onetime_tasks": [

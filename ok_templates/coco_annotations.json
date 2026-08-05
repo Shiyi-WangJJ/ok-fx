@@ -365,6 +365,42 @@
       "file_name": "63.png",
       "width": 1920,
       "height": 1080
+    },
+    {
+      "id": 66,
+      "file_name": "64.png",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "id": 67,
+      "file_name": "65.png",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "id": 68,
+      "file_name": "66.png",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "id": 69,
+      "file_name": "67.png",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "id": 70,
+      "file_name": "68.png",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "id": 71,
+      "file_name": "69.png",
+      "width": 1920,
+      "height": 1080
     }
   ],
   "annotations": [
@@ -1641,6 +1677,149 @@
       ],
       "area": 29891,
       "iscrowd": 0
+    },
+    {
+      "id": 99,
+      "image_id": 66,
+      "category_id": 99,
+      "bbox": [
+        948,
+        136,
+        224,
+        74
+      ],
+      "area": 16576,
+      "iscrowd": 0
+    },
+    {
+      "id": 100,
+      "image_id": 67,
+      "category_id": 100,
+      "bbox": [
+        940,
+        125,
+        235,
+        103
+      ],
+      "area": 24205,
+      "iscrowd": 0
+    },
+    {
+      "id": 101,
+      "image_id": 67,
+      "category_id": 101,
+      "bbox": [
+        76,
+        263,
+        231,
+        87
+      ],
+      "area": 20097,
+      "iscrowd": 0
+    },
+    {
+      "id": 102,
+      "image_id": 68,
+      "category_id": 102,
+      "bbox": [
+        68,
+        264,
+        206,
+        83
+      ],
+      "area": 17098,
+      "iscrowd": 0
+    },
+    {
+      "id": 103,
+      "image_id": 67,
+      "category_id": 103,
+      "bbox": [
+        457,
+        1033,
+        522,
+        33
+      ],
+      "area": 17226,
+      "iscrowd": 0
+    },
+    {
+      "id": 104,
+      "image_id": 67,
+      "category_id": 104,
+      "bbox": [
+        1108,
+        1024,
+        82,
+        43
+      ],
+      "area": 3526,
+      "iscrowd": 0
+    },
+    {
+      "id": 105,
+      "image_id": 67,
+      "category_id": 105,
+      "bbox": [
+        1351,
+        1020,
+        93,
+        47
+      ],
+      "area": 4371,
+      "iscrowd": 0
+    },
+    {
+      "id": 106,
+      "image_id": 67,
+      "category_id": 106,
+      "bbox": [
+        909,
+        522,
+        102,
+        29
+      ],
+      "area": 2958,
+      "iscrowd": 0
+    },
+    {
+      "id": 107,
+      "image_id": 69,
+      "category_id": 107,
+      "bbox": [
+        1355,
+        1024,
+        86,
+        42
+      ],
+      "area": 3612,
+      "iscrowd": 0
+    },
+    {
+      "id": 108,
+      "image_id": 70,
+      "category_id": 108,
+      "bbox": [
+        1232,
+        674,
+        263,
+        71
+      ],
+      "area": 18673,
+      "iscrowd": 0
+    },
+    {
+      "id": 109,
+      "image_id": 71,
+      "category_id": 109,
+      "bbox": [
+        1264,
+        663,
+        107,
+        58
+      ],
+      "area": 6206,
+      "iscrowd": 0
     }
   ],
   "categories": [
@@ -2132,6 +2311,61 @@
     {
       "id": 98,
       "name": "参与争锋PVP",
+      "supercategory": ""
+    },
+    {
+      "id": 99,
+      "name": "贸易商店",
+      "supercategory": ""
+    },
+    {
+      "id": 100,
+      "name": "贸易商店2",
+      "supercategory": ""
+    },
+    {
+      "id": 101,
+      "name": "补给兑换",
+      "supercategory": ""
+    },
+    {
+      "id": 102,
+      "name": "补给兑换2",
+      "supercategory": ""
+    },
+    {
+      "id": 103,
+      "name": "刷新区域",
+      "supercategory": ""
+    },
+    {
+      "id": 104,
+      "name": "多选",
+      "supercategory": ""
+    },
+    {
+      "id": 105,
+      "name": "刷新",
+      "supercategory": ""
+    },
+    {
+      "id": 106,
+      "name": "可兑换1次",
+      "supercategory": ""
+    },
+    {
+      "id": 107,
+      "name": "贸易商店购买",
+      "supercategory": ""
+    },
+    {
+      "id": 108,
+      "name": "贸易购买确认",
+      "supercategory": ""
+    },
+    {
+      "id": 109,
+      "name": "刷新确定",
       "supercategory": ""
     }
   ]

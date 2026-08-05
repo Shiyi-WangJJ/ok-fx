@@ -1,5 +1,6 @@
 """一条龙编排器 — 登录 → 领油 → 日常 → 演习 → 竞技 → 远征 → 倒油 → 任务 → 商店 → 领油"""
 import os
+import re
 import time
 import cv2
 from datetime import datetime
@@ -26,17 +27,26 @@ EVENT_DUAL = {"地狱EX": ["地狱EX", "地狱EX2"], "轮数设定": ["轮数设
 
 
 class DailyOrchestrator(BaseTask):
+    _first_init_done = False  # 模块级：区分真正启动 vs 热加载
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.name = "0. 一条龙"
         self.description = "登录→领油→日常→演习→竞技→远征→倒油→任务→商店→领油"
-        self.sleep_check_interval = 0.5
-        self.default_config.update({"倒油线路": "活动", "竞技线路": "争锋", "单步执行": "全部"})
+        self.sleep_check_interval = 0.2
+        self.default_config.update({"倒油线路": "活动", "竞技线路": "争锋", "单步执行": "全部", "贸易商店": False})
         self.config_type = {
             "倒油线路": {"options": ["活动", "20-5", "20-1"]},
             "竞技线路": {"options": ["争锋", "普通"]},
-            "单步执行": {"options": ["全部", "领油(1)", "出击-日常", "出击-演习", "出击-竞技", "远征", "倒油", "任务", "商店", "领油(2)"]},
+            "单步执行": {"options": ["全部", "领油(1)", "出击-日常", "出击-演习", "出击-竞技", "远征", "倒油", "任务", "商店", "贸易商店", "领油(2)"]},
         }
+
+    def on_create(self):
+        # 只在真正启动时重置为"全部"，热加载时不重置
+        if not DailyOrchestrator._first_init_done:
+            DailyOrchestrator._first_init_done = True
+            if self.config.get("单步执行", "全部") != "全部":
+                dict.__setitem__(self.config, "单步执行", "全部")
 
     # ==================================================================
     # 通用工具
@@ -773,6 +783,136 @@ class DailyOrchestrator(BaseTask):
         self.log_info("--- 商店-每日礼包完成 ---")
 
     # ==================================================================
+    # 贸易商店 → 每日购买
+    # ==================================================================
+
+    def do_trade_shop(self):
+        """贸易商店 → 每日免费兑换补给"""
+        self.log_info("--- 贸易商店 ---")
+
+        # 1. 商店
+        self.log_info("  >> 商店")
+        if not self._poll_and_tap("商店", 15):
+            self.log_info("    商店未找到，退出")
+            return
+        self.sleep(1.5)
+
+        # 2. 贸易商店（双匹配）
+        self.log_info("  >> 贸易商店")
+        if not self._poll_and_tap(["贸易商店", "贸易商店2"], 10):
+            self.log_info("    贸易商店未找到，退出")
+            self._go_home()
+            return
+        self.sleep(1.5)
+
+        # 3. 补给兑换（双匹配）
+        self.log_info("  >> 补给兑换")
+        if not self._poll_and_tap(["补给兑换", "补给兑换2"], 10):
+            self.log_info("    补给兑换未找到，退出")
+            self._go_home()
+            return
+        self.sleep(1.5)
+
+        # 3.5 识别免费刷新次数，决定循环轮数
+        self.log_info("  >> 识别刷新次数")
+        free_count = 0
+        try:
+            for _ in range(3):
+                boxes = self.ocr(box="刷新区域")
+                if boxes:
+                    self.log_info(f"    OCR结果: {[b.name for b in boxes]}")
+                    for b in boxes:
+                        m = re.search(r'(\d+)\s*/\s*(\d+)', b.name)
+                        if m:
+                            free_count = int(m.group(1))
+                            self.log_info(f"    免费刷新: {m.group(1)}/{m.group(2)}，共 {free_count} 轮")
+                            break
+                    break
+                self.sleep(0.5)
+        except Exception as e:
+            self.log_info(f"    OCR失败: {e}")
+
+        if free_count <= 0:
+            self.log_info("    无免费刷新次数，退出")
+            self._go_home()
+            self.log_info("--- 贸易商店完成 ---")
+            return
+
+        # 4. 首轮（已有道具）+ free_count 轮刷新
+        def _do_exchange_round(round_label="", need_multi_select=True):
+            """选道具 → 购买。首轮需要点多选，刷新后不需要"""
+            self.log_info(f"  == {round_label} ==")
+            if need_multi_select:
+                self.log_info("  >> 多选")
+                if not self._poll_and_tap("多选", 8):
+                    self.log_info("    多选未找到")
+                    return False
+                self.sleep(1)
+
+            total_clicked = 0
+            for rn in [1, 2]:
+                if rn == 2:
+                    self.log_info("  >> 下拉")
+                    self.swipe_relative(0.5, 0.7, 0.5, 0.35)
+                    self.sleep(1)
+                self.log_info(f"  >> 第{rn}轮检索 可兑换1次")
+                boxes = self.find_feature("可兑换1次", horizontal_variance=1, vertical_variance=1, limit=0,
+                                          use_gray_scale=True)
+                self.log_info(f"    找到 {len(boxes)} 个")
+                if rn == 2 and boxes:
+                    mid_y = sum(b.y for b in boxes) / len(boxes)
+                    boxes = [b for b in boxes if b.y > mid_y]
+                    self.log_info(f"    过滤后 {len(boxes)} 个(仅下半屏)")
+                for box in boxes:
+                    if self.exit_is_set():
+                        return False
+                    self.click_box(box)
+                    self.sleep(0.5)
+                    total_clicked += 1
+
+            if total_clicked > 0:
+                self.log_info("  >> 贸易商店购买")
+                if self._poll_and_tap("贸易商店购买", 3):
+                    self.sleep(1)
+                    self.log_info("  >> 贸易购买确认")
+                    if self._poll_and_tap("贸易购买确认", 3):
+                        self.sleep(5)
+                    else:
+                        self.log_info("    贸易购买确认未找到")
+                        self.sleep(5)
+                    return True
+                elif self._find_one_safe("刷新") is not None:
+                    self.log_info("    购买未出现，刷新仍在(未选上道具)")
+                else:
+                    self.log_info("    贸易商店购买未找到")
+            else:
+                self.log_info("    无可兑换项")
+            return False
+
+        # 首轮：刚进页面，道具已存在
+        _do_exchange_round("首轮")
+
+        # 后续：点刷新 → 再兑换
+        for i in range(free_count):
+            if self.exit_is_set():
+                return
+            self.log_info(f"  >> 刷新 ({i + 1}/{free_count})")
+            if not self._poll_and_tap("刷新", 8):
+                self.log_info("    刷新未找到，退出循环")
+                break
+            self.sleep(1)
+            # 刷新确认
+            self.log_info("  >> 刷新确定")
+            if self._poll_and_tap("刷新确定", 5):
+                self.sleep(1)
+            else:
+                self.log_info("    刷新确定未找到")
+            _do_exchange_round(f"刷新轮 {i + 1}/{free_count}", need_multi_select=False)
+
+        self._go_home()
+        self.log_info("--- 贸易商店完成 ---")
+
+    # ==================================================================
     # 主流程
     # ==================================================================
 
@@ -803,6 +943,9 @@ class DailyOrchestrator(BaseTask):
             ("商店", self.do_shop),
             ("领油(2)", self.do_oil),
         ]
+        # 贸易商店：开关打开时追加到步骤列表
+        if self.config.get("贸易商店", False):
+            steps.append(("贸易商店", self.do_trade_shop))
 
         for label, fn in steps:
             if self.exit_is_set():
