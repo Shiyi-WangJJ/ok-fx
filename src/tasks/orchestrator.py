@@ -896,6 +896,9 @@ class DailyOrchestrator(BaseTask):
         for i in range(free_count):
             if self.exit_is_set():
                 return
+            # 等 UI 过渡完成（sleep(5) 可能被 sleep_check→click_box 的嵌套 sleep 截断，
+            # "点击继续"关闭后游戏需要 ~2s 回到商店列表，否则"刷新确定"弹不出）
+            self.sleep(2)
             self.log_info(f"  >> 刷新 ({i + 1}/{free_count})")
             if not self._poll_and_tap("刷新", 8):
                 self.log_info("    刷新未找到，退出循环")
