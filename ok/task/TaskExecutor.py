@@ -307,39 +307,43 @@ class TaskExecutor:
         if self.debug_mode:
             time.sleep(timeout)
             return
+        saved_end = self.pause_end_time
         self.pause_end_time = time.time() + timeout
         to_sleep = 0
         task = None
-        while True:
-            self.check_enabled(check_pause=False)
-            if self.current_task is not None:
-                task = self.current_task
-                if task.sleep_check_interval >= 0:
-                    if not task.in_sleep_check and time.time() - task.last_sleep_check_time > task.sleep_check_interval:
-                        task.in_sleep_check = True
-                        try:
-                            self.next_frame()
-                            task.sleep_check()
-                            self.reset_scene()
-                        except Exception as e:
-                            logger.info(f"sleep_check error {task}")
-                            raise
-                        finally:
-                            task.last_sleep_check_time = time.time()
-                            task.in_sleep_check = False
-            if self.exit_event.is_set():
-                logger.info("sleep Exit event set. Exiting early.")
-                sys.exit(0)
-            if not (self.paused or (
-                    self.current_task is not None and self.current_task.paused) or self.interaction is None or not self.interaction.should_capture()):
-                to_sleep = self.pause_end_time - time.time()
-                if to_sleep <= 0:
-                    return
-                if to_sleep > 0.001:
-                    to_sleep = 0.001
-                time.sleep(to_sleep)
-            else:
-                time.sleep(0.1)
+        try:
+            while True:
+                self.check_enabled(check_pause=False)
+                if self.current_task is not None:
+                    task = self.current_task
+                    if task.sleep_check_interval >= 0:
+                        if not task.in_sleep_check and time.time() - task.last_sleep_check_time > task.sleep_check_interval:
+                            task.in_sleep_check = True
+                            try:
+                                self.next_frame()
+                                task.sleep_check()
+                                self.reset_scene()
+                            except Exception as e:
+                                logger.info(f"sleep_check error {task}")
+                                raise
+                            finally:
+                                task.last_sleep_check_time = time.time()
+                                task.in_sleep_check = False
+                if self.exit_event.is_set():
+                    logger.info("sleep Exit event set. Exiting early.")
+                    sys.exit(0)
+                if not (self.paused or (
+                        self.current_task is not None and self.current_task.paused) or self.interaction is None or not self.interaction.should_capture()):
+                    to_sleep = self.pause_end_time - time.time()
+                    if to_sleep <= 0:
+                        return
+                    if to_sleep > 0.001:
+                        to_sleep = 0.001
+                    time.sleep(to_sleep)
+                else:
+                    time.sleep(0.1)
+        finally:
+            self.pause_end_time = saved_end
 
     def pause(self, task=None):
         if task is not None:

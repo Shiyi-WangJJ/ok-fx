@@ -24,7 +24,5 @@ config = {
         ["src.tasks.mission", "MissionTask"],
         ["src.tasks.oil", "OilTask"],
     ],
-    "trigger_tasks": [
-        ["src.tasks.popups", "PopupTrigger"],
-    ],
+    "trigger_tasks": [],
 }

@@ -1,80 +1,125 @@
-# ok-script
-* ok-script 是基于图像识别技术, 纯Python实现的, 支持Windows窗口和模拟器的自动化测试框架。
-* 框架包含UI, 截图, 输入, 设备控制, OCR, 模板匹配, 框框Debug浮层, 基于Github Action的测试, 打包, 升级/降级。
-* 基于开发一个工业级的自动化软件仅需几百行代码。
+# ok-fx · 拂晓自动化
 
-## 优势
+基于 [ok-script](https://github.com/ok-oldking/ok-py) 图像识别框架的《拂晓》自动化工具。
 
-1. 纯Python实现, 免费开源, 依赖库均为开源方案
-2. 支持pip install任何第三方库, 可以方便整合yolo等框架
-3. 一套代码即可支持Windows安卓模拟器/ADB连接的虚拟机, Windows客户端游戏
-4. 自适应分辨率
-5. 使用coco管理图片匹配素材, 仅需一个分辨率下的截图就, 支持不同分辨率自适应
-6. 可打包离线/在线安装setup.exe, 支持通过Pip/Git国内镜像在线增量更新. 在线安装包仅3M
-7. 支持Github Action一键构建
-8. 支持多语言国际化
+通过 ADB 截图 + OpenCV 模板匹配操控安卓模拟器，**不读取游戏内存、不修改游戏文件**。
 
-## [使用基于ok-script的按键精灵, 快速学习和开始](https://github.com/ok-oldking/ok-py)
+> 开发者群：938132715
 
-**API列表, 脚本录制**
-![image_scripting](docs/ok_py/image_scripting.png)
+---
 
-**支持多种截图以及交互方式**
-![image_screenshot](docs/ok_py/image_capture.png)
+## ⚠️ 免责声明
 
-**标注管理 (Template Matching)**
-![image_template](docs/ok_py/image_template.png)
-![image_markup](docs/ok_py/image_markup.png)
+本软件为开源、免费的外部辅助工具，仅供学习与交流使用。完全通过模拟用户界面交互，不修改任何游戏文件或数据。
 
-### 使用 推荐使用Python 3.12
+**拂晓官方严禁使用任何第三方工具**，使用本软件可能面临冻结或封禁账号的风险。使用者需自行承担一切潜在风险。
 
-* 在你的项目中通过pip依赖使用
-```commandline
-pip install ok-script
+---
+
+## ✨ 主要功能
+
+| 分类 | 功能 |
+|------|------|
+| **每日一条龙** | 登录 → 领油 → 出击日常(6卡) → 演习 → 竞技 → 远征 → 倒油 → 任务 → 商店 → 领油 |
+| **无尽海域** | 每周 60 关自动推图，自动编队 |
+| **弹窗处理** | 自动关闭公告、登录补给、更新确认弹窗 |
+| **退役处理** | 船舱满时自动退役 |
+| **商店** | 每日礼包、启航包免费购买、贸易商店兑换 |
+| **多线路** | 活动 / 主线 (20-10 / 20-5 / 20-1) 双线路倒油 |
+| **单步调试** | 支持单独执行某个模块 |
+
+---
+
+## 🖥️ 运行环境
+
+| 项目 | 要求 |
+|------|------|
+| **操作系统** | Windows |
+| **Python** | 3.12 |
+| **模拟器** | MuMuPlayer 12 |
+| **分辨率** | 1920×1080 (16:9) |
+| **游戏** | 拂晓 `com.nineyou.fuxiao` |
+
+---
+
+## 📦 快速开始
+
+1. 安装 [MuMuPlayer 12](https://mumu.163.com/) 模拟器，分辨率设为 1920×1080
+2. 在模拟器中安装《拂晓》，确保 ADB 调试已开启
+3. 下载安装包（推荐）或从源码运行
+
+### 安装包（推荐）
+
+从 [GitHub Releases](https://github.com/Shiyi-WangJJ/ok-fx/releases) 下载 `ok-fx-win32-Global-setup.exe`，双击安装。
+
+### 从源码运行
+
+```bash
+git clone https://github.com/Shiyi-WangJJ/ok-fx.git
+cd ok-fx
+python -m venv venv
+venv\Scripts\pip install -r requirements.txt
 ```
 
-* 编译国际化文件
-```commandline
-compile_i18n.cmd
+### 启动
+
+```bash
+# GUI 模式
+venv\Scripts\python.exe launch_gui.py
+
+# 无头模式
+venv\Scripts\python.exe run.py
 ```
 
-## 文档和示例代码
+启动后自动连接 MuMu 模拟器 `127.0.0.1:16384`，按 **F9** 启动/停止任务。
 
-* [游戏自动化入门](docs/intro_to_automation/README.md)
-  - [1、基本原理：计算机如何“玩”游戏](docs/intro_to_automation/README.md#一基本原理计算机如何玩游戏)
-    - [核心循环：三步走](docs/intro_to_automation/README.md#核心循环三步走)
-    - [图像分析：从像素到决策](docs/intro_to_automation/README.md#图像分析从像素到决策)
-        - [传统图色算法 (OpenCV 库)](docs/intro_to_automation/README.md#1-传统图色算法-opencv-库)
-        - [神经网络推理 (Inference)](docs/intro_to_automation/README.md#2-神经网络推理-inference)
-    - [2、编程语言选择](docs/intro_to_automation/README.md#二编程语言选择)
-        - [常用库概览](docs/intro_to_automation/README.md#常用库概览)
-    - [3、开发工具](docs/intro_to_automation/README.md#三开发工具)
-* [快速开始](docs/quick_start/README.md)
-* [API文档](docs/api_doc/README.md)
-  - [Box](docs/api_doc/README.md#box)
-  - [BaseTask](docs/api_doc/README.md#basetask)
-    - [截图 (Screenshot)](docs/api_doc/README.md#截图-screenshot)
-    - [输入 (Input)](docs/api_doc/README.md#输入-input)
-    - [OCR](docs/api_doc/README.md#ocr)
-    - [找图 (Image finding)](docs/api_doc/README.md#找图-image-finding)
-* [进阶使用](docs/after_quick_start/README.md)
-  - [1. 模板匹配 (Template Matching)](docs/after_quick_start/README.md#1-模板匹配-template-matching)
-  - [2. 多语言国际化 (i18n)](docs/after_quick_start/README.md#2-多语言国际化-i18n)
-  - [3. 自动化测试](docs/after_quick_start/README.md#3-自动化测试)
-  - [4. 使用 GitHub Action 自动化打包与发布](docs/after_quick_start/README.md#4-使用-github-action-自动化打包与发布)
-* 开发者群: 938132715
-* pip [https://pypi.org/project/ok-script](https://pypi.org/project/ok-script)
+---
 
+## ❓ 常见问题
 
-## 使用ok-script的项目：
+1. 模拟器必须开启 **ADB 调试**，端口默认 `16384`
+2. 游戏分辨率必须为 **1920×1080**
+3. 软件路径不要含中文字符
+4. 任务文件在 `src/tasks/` 下有**热加载**，改代码不需要重启
+5. F9 可能被其他程序占用（微信等），可在设置中修改快捷键
+6. 模板匹配失败：检查 `ok_templates/` 中的模板图是否为**白底**（非原始截图）
 
-* 鸣潮 [https://github.com/ok-oldking/ok-wuthering-wave](https://github.com/ok-oldking/ok-wuthering-waves)
-* 原神(不在维护,
-  但是后台过剧情可用) [https://github.com/ok-oldking/ok-genshin-impact](https://github.com/ok-oldking/ok-genshin-impact)
+---
+
+## 🛠️ 开发
+
+```bash
+# 安装开发依赖
+pip install -r requirements-dev.txt
+
+# 标注工具推荐 X-AnyLabeling，标注后跑白底
+python scripts/whiteout_templates.py
+```
+
+项目结构：
+
+```
+ok-fx/
+├── launch_gui.py           # GUI 入口
+├── run.py                  # 无头入口
+├── src/tasks/
+│   ├── orchestrator.py     # 一条龙编排器
+│   └── weekly.py           # 无尽海域 60 关
+├── ok/                     # ok-script 框架
+├── ok_templates/           # 模板图 + COCO 标注 (110+ 类特征)
+├── configs/                # 任务配置文件
+└── assets/                 # 原始截图留底
+```
+
+---
+
+## 📂 使用 ok-script 的项目
+
+* 鸣潮 [https://github.com/ok-oldking/ok-wuthering-waves](https://github.com/ok-oldking/ok-wuthering-waves)
 * 少前2 [https://github.com/ok-oldking/ok-gf2](https://github.com/ok-oldking/ok-gf2)
 * 星铁 [https://github.com/Shasnow/ok-starrailassistant](https://github.com/Shasnow/ok-starrailassistant)
 * 星痕共鸣 [https://github.com/Sanheiii/ok-star-resonance](https://github.com/Sanheiii/ok-star-resonance)
 * 二重螺旋 [https://github.com/BnanZ0/ok-duet-night-abyss](https://github.com/BnanZ0/ok-duet-night-abyss)
-* 白荆回廊(停止更新) [https://github.com/ok-oldking/ok-baijing](https://github.com/ok-oldking/ok-baijing)
 * 终末地 [https://github.com/AliceJump/ok-end-field](https://github.com/AliceJump/ok-end-field)
 * 异环 [https://github.com/BnanZ0/ok-nte](https://github.com/BnanZ0/ok-nte)
+* 鸣潮-okww [https://github.com/See-1e/okww](https://github.com/See-1e/okww)

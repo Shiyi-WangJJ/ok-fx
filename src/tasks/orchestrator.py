@@ -5,6 +5,7 @@ import time
 import cv2
 from datetime import datetime
 from ok.task.task import BaseTask
+from ok.task.exceptions import TaskDisabledException
 from ok import og
 
 GAME_PACKAGE = "com.nineyou.fuxiao"
@@ -36,7 +37,7 @@ class DailyOrchestrator(BaseTask):
         self.sleep_check_interval = 0.2
         self.default_config.update({"倒油线路": "活动", "竞技线路": "争锋", "单步执行": "全部", "贸易商店": False})
         self.config_type = {
-            "倒油线路": {"options": ["活动", "20-5", "20-1"]},
+            "倒油线路": {"options": ["活动", "20-5", "20-1", "20-10"]},
             "竞技线路": {"options": ["争锋", "普通"]},
             "单步执行": {"options": ["全部", "领油(1)", "出击-日常", "出击-演习", "出击-竞技", "远征", "倒油", "任务", "商店", "贸易商店", "领油(2)"]},
         }
@@ -117,18 +118,37 @@ class DailyOrchestrator(BaseTask):
         return not self.exit_is_set() and self.enabled
 
     def _confirm_home(self) -> bool:
-        """确认已进主页。商店=真到家，主页按钮=点一下即确认"""
-        for _ in range(10):
+        """快速检查是否在主页。用 time.sleep 避免 sleep_check 干扰。"""
+        for _ in range(15):
             if self._find_one_safe("商店") is not None:
                 return True
             home = self._find_one_safe("主页")
             if home is not None:
-                self.log_info("  检测到主页按钮，点击回主页...")
-                self.click_box(home)
-                self.sleep(1)
-                return True
-            self.sleep(0.2)
+                cx, cy = home.x + home.width // 2, home.y + home.height // 2
+                og.device_manager.shell(f"input tap {cx} {cy}")
+                time.sleep(0.8)
+            time.sleep(0.3)
         return False
+
+    def _click_while_present(self, name: str, timeout: float = 5, interval: float = 0.3) -> bool:
+        """模板在就一直点，消失才停。用 time.sleep，不触发 sleep_check。"""
+        deadline = time.time() + timeout
+        clicked = False
+        while time.time() < deadline:
+            box = self._find_one_safe(name)
+            if box:
+                cx, cy = box.x + box.width // 2, box.y + box.height // 2
+                og.device_manager.shell(f"input tap {cx} {cy}")
+                clicked = True
+                time.sleep(interval)
+            elif clicked:
+                self.log_info(f"  {name} 已消失 ({'点击过' if clicked else '未出现'})")
+                return True
+            else:
+                time.sleep(interval)
+        if not clicked:
+            self.log_info(f"  {name} 未出现，跳过")
+        return clicked
 
     def _go_home(self):
         """回到主页"""
@@ -156,7 +176,7 @@ class DailyOrchestrator(BaseTask):
             self.log_info("已在主页，跳过登录")
             return
 
-        # 预检：主页在 = 在游戏里，点一下回家（不等商店，商店标注可能分数低）
+        # 预检：主页在 = 在游戏里，点一下回家
         home_btn = self._find_one_safe("主页")
         if home_btn is not None:
             self.log_info("检测到主页按钮，点击回主页...")
@@ -178,20 +198,31 @@ class DailyOrchestrator(BaseTask):
             og.device_manager.adb_ensure_in_front()
         self.sleep(6)
 
-        # Step 2: 等启动画面
+        # Step 2: 等启动画面，看到了就点右下直到消失
         self.log_info("Step 2: 等待启动16 (超时120s)...")
         waited = 0
+        splash_seen = False
         while self._should_continue() and waited < 120:
-            if self._find_one_safe("启动16") is not None:
-                break
             for popup in ["更新确定", "公告X"]:
                 b = self._find_one_safe(popup)
                 if b:
                     self.click_box(b)
                     self.sleep(0.5)
+            if self._find_one_safe("启动16") is not None:
+                splash_seen = True
+                og.device_manager.shell("input tap 1842 851")
+                self.sleep(0.35)
+            elif splash_seen:
+                # 启动16出现了又消失 = 加载完了
+                self.log_info("  启动16 已消失，进入游戏")
+                break
             self.sleep(0.3)
             waited += 0.3
 
+        if not self._should_continue():
+            return
+
+        # Step 3: 点击出击位置快速进主页，同时处理弹窗
         if self._should_continue():
             self.log_info("  点击出击位置 15 秒...")
             cx, cy = 1842, 851
@@ -204,54 +235,53 @@ class DailyOrchestrator(BaseTask):
                         self.log_info(f"  检测到{popup}，点击关闭")
                         self.click_box(b)
                         self.sleep(0.5)
-                og.device_manager.shell(f"input tap {cx} {cy}")
-                self.log_info(f"  [{i+1}/15]")
+                # 先检查到家没，避免在主页上误点出击跳到别的界面
                 if self._confirm_home():
                     self.log_info("  已进主页，停止点击")
-                    return
+                    break
+                og.device_manager.shell(f"input tap {cx} {cy}")
+                self.log_info(f"  [{i+1}/15]")
                 if i < 14:
                     self.sleep(1)
             self.log_info("  15 秒点击完成")
 
-        # Step 3: 关公告X (超时3s)
-        self.log_info("Step 3: 关闭公告X (超时3s)...")
-        notice_clicks = 0
-        gone_count = 0
-        step3_start = 0
-        while self._should_continue() and step3_start < 3:
-            box = self._find_one_safe("公告X")
-            if box is not None:
-                gone_count = 0
-                self.click_box(box)
-                notice_clicks += 1
-                self.sleep(0.3)
-            else:
-                if notice_clicks > 0:
-                    gone_count += 1
-                    if gone_count >= 8:
-                        self.log_info(f"  公告X 消失 (点击 {notice_clicks} 次)")
-                        break
-                step3_start += 1
-                self.sleep(1)
-        if step3_start >= 3 and notice_clicks == 0:
-            self.log_info("  公告X 未出现，跳过")
-
-        # Step 4: 关登录补给X
-        self.log_info("Step 4: 登录补给X...")
+        # Step 4: 关公告X (click_while_present)
+        self.log_info("Step 4: 清理公告X...")
         if self._should_continue():
-            for _ in range(10):
-                if not self._should_continue():
+            n_clicks = 0
+            while self._should_continue() and n_clicks < 20:
+                box = self._find_one_safe("公告X")
+                if box:
+                    self.click_box(box)
+                    n_clicks += 1
+                    self.sleep(0.3)
+                elif n_clicks > 0:
+                    # 之前点过，现在已经消失
+                    self.log_info(f"  公告X 已消失 (点击 {n_clicks} 次)")
                     break
+                else:
+                    self.log_info("  公告X 未出现，跳过")
+                    break
+
+        # Step 5: 关登录补给X (click_while_present)
+        self.log_info("Step 5: 清理登录补给X...")
+        if self._should_continue():
+            n_clicks = 0
+            while self._should_continue() and n_clicks < 20:
                 box = self._find_one_safe("登录补给X")
                 if box:
                     self.click_box(box)
-                    self.sleep(0.5)
+                    n_clicks += 1
+                    self.sleep(0.3)
+                elif n_clicks > 0:
+                    self.log_info(f"  登录补给X 已消失 (点击 {n_clicks} 次)")
+                    break
                 else:
                     self.log_info("  登录补给X 未出现，跳过")
                     break
 
-        # Step 5: 最终确认主页
-        self.log_info("Step 5: 等待主页出现...")
+        # Step 6: 最终确认主页
+        self.log_info("Step 6: 确认主页...")
         while self._should_continue():
             if self._confirm_home():
                 self.log_info("  已进主页，登录完成!")
@@ -280,12 +310,29 @@ class DailyOrchestrator(BaseTask):
                     break
                 self.sleep(0.5)
             if found and name in OIL_CONFIRM:
-                self.sleep(0.5)
+                last_step = (name == OIL_STEPS[-2])  # 一键领取是最后一个需要确认的步骤
+                home_reached = False
                 for _ in range(10):
-                    if self._find_and_tap("确定"):
-                        self.log_info("    已点击确定")
+                    # 先处理确认弹窗
+                    box = self._find_one_safe("确定") or self._find_one_safe("点击继续")
+                    if box:
+                        self.log_info(f"    已点击{box.name}")
+                        self.click_box(box)
+                        self.sleep(0.3)
+                        continue
+                    if last_step:
+                        # 一键领取后尝试回主页 — 能回去说明流程完成了
+                        self._find_and_tap("主页")
+                        if self._find_one_safe("商店") is not None:
+                            self.log_info("    已回主页")
+                            home_reached = True
+                            break
+                    else:
+                        # 非最后一步，弹窗消失即可继续
                         break
                     self.sleep(0.3)
+                if home_reached:
+                    break
             elif not found:
                 self.log_info(f"    {name} 未找到，跳过")
         self.sleep(2)
@@ -474,6 +521,7 @@ class DailyOrchestrator(BaseTask):
     def do_expedition(self):
         """出击→远征→领取→12小时→远征1~4出征→回主页"""
         self.log_info("--- 远征 ---")
+        self._go_home()
         for step in ["出击", "远征"]:
             if self.exit_is_set():
                 return
@@ -519,7 +567,7 @@ class DailyOrchestrator(BaseTask):
     def do_event(self):
         """倒油——活动或主线"""
         mode = self.config.get("倒油线路", "活动")
-        if mode in ("20-5", "20-1"):
+        if mode in ("20-5", "20-1", "20-10"):
             self._run_event_main_story(mode)
         else:
             self._run_event_activity()
@@ -960,6 +1008,9 @@ class DailyOrchestrator(BaseTask):
             self.log_info(f"\n{'─' * 30}\n  {label}\n{'─' * 30}")
             try:
                 fn()
+            except TaskDisabledException:
+                self.log_info(f"  !! {label} 用户停止")
+                break
             except Exception as e:
                 self.log_info(f"  !! {label} 异常: {e}")
                 # 尝试回主页继续下一个

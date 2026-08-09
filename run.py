@@ -39,9 +39,7 @@ config = {
         ["src.tasks.weekly", "WeeklyTask"],
         ["src.tasks.oil", "OilTask"],
     ],
-    "trigger_tasks": [
-        ["src.tasks.popups", "PopupTrigger"],
-    ],
+    "trigger_tasks": [],
 }
 
 if __name__ == "__main__":

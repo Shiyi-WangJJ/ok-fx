@@ -401,6 +401,12 @@
       "file_name": "69.png",
       "width": 1920,
       "height": 1080
+    },
+    {
+      "id": 72,
+      "file_name": "70.png",
+      "width": 1920,
+      "height": 1080
     }
   ],
   "annotations": [
@@ -1820,6 +1826,19 @@
       ],
       "area": 6206,
       "iscrowd": 0
+    },
+    {
+      "id": 110,
+      "image_id": 72,
+      "category_id": 110,
+      "bbox": [
+        1613,
+        601,
+        230,
+        53
+      ],
+      "area": 12190,
+      "iscrowd": 0
     }
   ],
   "categories": [
@@ -2366,6 +2385,11 @@
     {
       "id": 109,
       "name": "刷新确定",
+      "supercategory": ""
+    },
+    {
+      "id": 110,
+      "name": "20-10",
       "supercategory": ""
     }
   ]

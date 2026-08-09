@@ -221,18 +221,21 @@ PyAppify 打包的 exe 内置 `pyappify` 库，启动时从 `git_url` 检查最�
 
 **每次标注后必须处理白底，否则彩色截图直接提交会破坏模板匹配。**
 
-完整流程：
-1. GUI → 截图测试 → 截取当前画面 → 截图存入 `assets/screenshots/`（原始彩图）
-2. X-AnyLabeling 标注 → 导出 COCO → 覆盖 `ok_templates/coco_annotations.json`
-3. **跑白底脚本**：`python scripts/whiteout_templates.py`
+实际情况：GUI 截图工具默认把截图存到 `ok_templates/`（不是 `assets/screenshots/`）。所以完整流程：
 
-脚本逻辑：读取 `assets/screenshots/` 中的彩图 + `coco_annotations.json` 的 bbox，框外填纯白，输出到 `ok_templates/` 覆盖原图。
+1. GUI → 截图测试 → 截图直接存入 `ok_templates/`（彩图）
+2. X-AnyLabeling 标注 → 导出 COCO → 覆盖 `ok_templates/coco_annotations.json`
+3. **把 `ok_templates/` 里的彩图拷到 `assets/screenshots/`**：
+   ```bash
+   cp ok_templates/新增的.png assets/screenshots/
+   ```
+4. **跑白底脚本**：`python scripts/whiteout_templates.py`（读取 `assets/screenshots/` 彩图 → 白底 → 写回 `ok_templates/`）
 
 目录分工：
-- `assets/screenshots/` — 原始彩图（`.gitignore`，不提交，留档用）
-- `ok_templates/` — 白底模板 + COCO JSON（提交到 git）
+- `ok_templates/` — 截图工具输出的彩图 + COCO JSON + **最终白底模板**（提交到 git）
+- `assets/screenshots/` — 原始彩图留底（`.gitignore`，不提交，白底脚本的输入源）
 
-⚠️ **Claude 规则：每次 annotations 变更后必须自动跑白底，不需要用户提醒。** 如果 `assets/screenshots/` 缺少源图，检查 `ok_templates/` 里是否有彩图可复用为源图。
+⚠️ **Claude 规则：每次 annotations 变更后必须自动跑白底，不需要用户提醒。** 步骤：先检查 `ok_templates/` 里有没有新彩图（文件 1MB+）→ 拷到 `assets/screenshots/` → 跑白底脚本。
 
 ### 应用图标
 

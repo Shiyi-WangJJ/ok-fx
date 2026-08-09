@@ -43,10 +43,7 @@ config = {
         ["src.tasks.orchestrator", "DailyOrchestrator"],
         ["src.tasks.weekly", "WeeklyTask"],
     ],
-    # 后台弹窗监控（仅 点击继续，不含 确定）
-    "trigger_tasks": [
-        ["src.tasks.popups", "PopupTrigger"],
-    ],
+    "trigger_tasks": [],
 }
 
 ok = OK(config)
