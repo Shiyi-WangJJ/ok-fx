@@ -693,7 +693,13 @@ class DailyOrchestrator(BaseTask):
                     return
                 self.log_info(f"  >> Step {i+1}: {name}")
                 if name == level:
-                    found = self._poll_and_tap(name, 10, horizontal_variance=1.0, vertical_variance=1.0)
+                    # 20-10 关卡靠右，不滑看不到
+                    if level == "20-10":
+                        self.log_info("    20-10: 先右滑露出关卡")
+                        self.swipe_relative(0.7, 0.55, 0.25, 0.55, duration=0.6)
+                        self.sleep(1)
+                    found = self._poll_and_tap(name, 10, threshold=0.85,
+                                               horizontal_variance=1.0, vertical_variance=1.0)
                 else:
                     found = self._poll_and_tap(name, 10)
                 if not found:
