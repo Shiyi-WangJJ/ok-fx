@@ -717,7 +717,9 @@ class DailyOrchestrator(BaseTask):
             retired = False
             while self._should_continue():
                 # 离开/主页 → 结束
-                if self._find_and_tap("离开") or self._find_and_tap("主页"):
+                # 离开按钮位置会变(实测 x 从 1276 偏移到 1039)，默认小范围检索会漏检，改全屏
+                if (self._find_and_tap("离开", horizontal_variance=1.0, vertical_variance=1.0)
+                        or self._find_and_tap("主页")):
                     self.log_info("  战斗结束")
                     self.sleep(1)
                     break
