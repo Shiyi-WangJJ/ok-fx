@@ -61,8 +61,10 @@ class DailyOrchestrator(BaseTask):
                 self.click_box(box)
                 return
 
-    def _find_one_safe(self, name: str):
+    def _find_one_safe(self, name: str, threshold: float = None):
         try:
+            if threshold is not None:
+                return self.find_one(name, threshold=threshold)
             return self.find_one(name)
         except ValueError:
             return None
@@ -229,8 +231,8 @@ class DailyOrchestrator(BaseTask):
             for i in range(15):
                 if not self._should_continue():
                     break
-                for popup in ["更新确定", "公告X", "登录补给X"]:
-                    b = self._find_one_safe(popup)
+                for popup, thr in [("更新确定", None), ("公告X", None), ("登录补给X", 0.55)]:
+                    b = self._find_one_safe(popup, threshold=thr)
                     if b:
                         self.log_info(f"  检测到{popup}，点击关闭")
                         self.click_box(b)
@@ -268,7 +270,7 @@ class DailyOrchestrator(BaseTask):
         if self._should_continue():
             n_clicks = 0
             while self._should_continue() and n_clicks < 20:
-                box = self._find_one_safe("登录补给X")
+                box = self._find_one_safe("登录补给X", threshold=0.55)
                 if box:
                     self.click_box(box)
                     n_clicks += 1
