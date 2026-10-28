@@ -377,6 +377,7 @@ class MainWindow(FluentWindow):
                 self.app.start_controller.start()
             # Check for .okscript file in command line arguments
             self._check_okscript_args()
+            self._schedule_auto_start_tasks(args)
         super().showEvent(event)
         if first_show:
             QTimer.singleShot(0, self.bring_to_front)
@@ -530,6 +531,56 @@ class MainWindow(FluentWindow):
                             alert_error(f"Import failed: {message}")
                 except Exception as e:
                     logger.error(f'Error importing .okscript file: {e}')
+
+    def _schedule_auto_start_tasks(self, args):
+        """启动后自动执行 launch 配置里的 auto_start_tasks（默认一条龙）"""
+        if (args.get('task') or 0) > 0:
+            logger.info('skip auto start tasks because a task is specified by command line')
+            return
+        names = self.config.get('auto_start_tasks') or []
+        if not names:
+            logger.info('auto_start_tasks is empty, skip auto start')
+            return
+        delay = float(self.config.get('auto_start_delay', 6))
+        logger.info(f'auto start tasks {names} in {delay}s')
+        QTimer.singleShot(int(delay * 1000), lambda: self._auto_start_tasks(names))
+
+    def _resolve_onetime_tasks(self, names):
+        resolved = []
+        for name in names:
+            task = next((t for t in self.executor.onetime_tasks
+                         if name in (t.name, type(t).__name__) or t.name.endswith(name)), None)
+            if task is None:
+                logger.error(f'auto start task not found: {name}')
+            elif task not in resolved:
+                resolved.append(task)
+        return resolved
+
+    def _auto_start_tasks(self, names):
+        if self.exit_event.is_set():
+            return
+        tasks_to_run = self._resolve_onetime_tasks(names)
+        if not tasks_to_run:
+            return
+        task_names = [t.name for t in tasks_to_run]
+
+        def _run():
+            from ok import og
+            try:
+                og.device_manager.do_refresh(True)
+                if not self.app.start_controller.start_device():
+                    logger.error(f'[自动启动] 设备未就绪，取消自动执行 {task_names}')
+                    return
+                for task in tasks_to_run:
+                    if not task.enabled:
+                        task.enable()
+                logger.info(f'[自动启动] 开始执行 {task_names}')
+                og.executor.start()
+            except Exception as e:
+                logger.error(f'[自动启动] 异常: {e}', e)
+
+        logger.info(f'[自动启动] 延迟结束，准备执行 {task_names}')
+        threading.Thread(target=_run, name='AutoStartTasks').start()
 
     def on_system_theme_changed(self, system_theme):
         """Handle system theme change signal."""

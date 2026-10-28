@@ -44,6 +44,11 @@ config = {
         ["src.tasks.weekly", "WeeklyTask"],
     ],
     "trigger_tasks": [],
+    # 启动后自动执行的任务（写任务名或类名，如 "一条龙"；空列表 [] = 关闭该功能）
+    # 命令行带任务参数启动时（--task N）不会自动执行
+    "auto_start_tasks": ["一条龙"],
+    # 启动后延迟多少秒再开始，等主窗口显示完成、ADB 就绪
+    "auto_start_delay": 6,
 }
 
 ok = OK(config)
