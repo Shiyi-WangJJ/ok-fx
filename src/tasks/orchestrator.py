@@ -23,7 +23,7 @@ HOUR12 = ["12小时", "12小时2"]
 
 # 倒油-活动
 EVENT_TAP_COORDS = {"活动": (1808, 703), "活动出击": (1676, 966)}
-EVENT_STEPS = ["活动", "活动出击", "地狱EX", "开始委托", "轮数设定", "活动MAX", "活动确认", "活动开始委托"]
+EVENT_STEPS = ["活动", "活动出击", "地狱EX", "离线委托", "轮数设定", "活动MAX", "活动确认", "活动开始委托"]
 EVENT_DUAL = {"地狱EX": ["地狱EX", "地狱EX2"], "轮数设定": ["轮数设定", "轮数设定2"]}
 
 
@@ -152,20 +152,47 @@ class DailyOrchestrator(BaseTask):
             self.log_info(f"  {name} 未出现，跳过")
         return clicked
 
-    def _go_home(self):
-        """回到主页"""
-        for _ in range(30):
+    def _is_home(self) -> bool:
+        """主页判定：底部能看到商店按钮"""
+        return self._find_one_safe("商店") is not None
+
+    def _go_home(self, max_rounds: int = 30, quiet: bool = False) -> bool:
+        """固定回主页流程：商店可见 → 完成；否则依次 关弹窗 / 点主页按钮 / 点左上返回箭头。
+        返回是否真的回到了主页（调用方据此决定要不要继续往下走）。"""
+        for _ in range(max_rounds):
             if not self._should_continue():
-                return
-            if self._find_one_safe("商店") is not None:
-                self.log_info("  主页已出现")
-                return
+                return False
+            if self._is_home():
+                if not quiet:
+                    self.log_info("  主页已出现")
+                return True
+            popup = self._find_one_safe("点击继续")
+            if popup is not None:
+                self.log_info(f"  弹窗: {popup.name} -> 点击")
+                self.click_box(popup)
+                self.sleep(0.5)
+                continue
             if self._find_and_tap("主页"):
-                self.log_info("  主页已出现")
-                return
+                self.sleep(0.8)
+                continue
             og.device_manager.shell("input tap 355 59")
             self.sleep(1)
-        self.log_info("  回主页超时")
+        if self._is_home():
+            return True
+        if not quiet:
+            self.log_info("  回主页超时")
+        return False
+
+    def _ensure_home_at_start(self, label: str) -> bool:
+        """每个任务开头：不在主页就先走固定回主页流程；回不去就不让它继续往下走"""
+        if self._is_home():
+            return True
+        self.log_info("  !! 开头不在主页，执行固定回主页流程")
+        if self._go_home():
+            self.log_info("  已回到主页，继续")
+            return True
+        self.log_info(f"  !! 回主页失败，跳过 {label}，不继续往下走")
+        return False
 
     # ==================================================================
     # 登录
@@ -577,21 +604,17 @@ class DailyOrchestrator(BaseTask):
     def _run_event_activity(self):
         """活动倒油"""
         self.log_info("--- 倒油-活动 ---")
-        # 确认主页
-        for _ in range(10):
-            if self.exit_is_set():
-                return
-            if self._find_one_safe("商店") is not None:
-                break
-            og.device_manager.shell("input tap 355 59")
-            self.sleep(1)
+        # 开头卡住（不在主页）就先走固定回主页流程，回不去就停，不再往下点
+        if not self._go_home(quiet=True):
+            self.log_info("  !! 回主页失败，停止倒油-活动")
+            return
 
         while self._should_continue():
             for name in EVENT_STEPS:
                 if self.exit_is_set():
                     return
 
-                if name == "开始委托":
+                if name == "离线委托":
                     if self._find_and_tap("委托完成", use_gray_scale=True):
                         self.sleep(0.5)
                         for _ in range(10):
@@ -660,17 +683,7 @@ class DailyOrchestrator(BaseTask):
                 self.sleep(3 if name == "退役确定" else 1)
 
         self.log_info("退役处理完毕，重新跑倒油...")
-        self.log_info("  回主页...")
-        for _ in range(30):
-            if self.exit_is_set():
-                return True
-            self._find_and_tap("主页")
-            self.sleep(0.5)
-            if self._find_one_safe("主页") is None:
-                self.log_info("  已回到主页")
-                break
-        else:
-            self.log_info("  回主页超时，继续")
+        self._go_home()
         return True
 
     def _run_event_main_story(self, level: str):
@@ -681,14 +694,10 @@ class DailyOrchestrator(BaseTask):
             return
 
         while self._should_continue():
-            # 确认主页
-            for _ in range(10):
-                if self.exit_is_set():
-                    return
-                if self._find_one_safe("商店") is not None:
-                    break
-                og.device_manager.shell("input tap 355 59")
-                self.sleep(1)
+            # 开头卡住（不在主页）就先走固定回主页流程，回不去就停，不再往下点
+            if not self._go_home(quiet=True):
+                self.log_info("  !! 回主页失败，停止倒油主线")
+                return
 
             for i, name in enumerate(["出击", "主线", level, "托管", "主线开始托管"]):
                 if self.exit_is_set():
@@ -1016,6 +1025,9 @@ class DailyOrchestrator(BaseTask):
             if single != "全部" and label != single:
                 continue
             self.log_info(f"\n{'─' * 30}\n  {label}\n{'─' * 30}")
+            # 每条任务开头先确认在主页，卡住就先回主页，回不去就跳过这条
+            if not self._ensure_home_at_start(label):
+                continue
             try:
                 fn()
             except TaskDisabledException:

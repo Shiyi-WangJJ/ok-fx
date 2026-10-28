@@ -97,12 +97,6 @@
       "height": 1080
     },
     {
-      "id": 20,
-      "file_name": "19.png",
-      "width": 1920,
-      "height": 1080
-    },
-    {
       "id": 21,
       "file_name": "20.png",
       "width": 1920,
@@ -405,6 +399,12 @@
     {
       "id": 72,
       "file_name": "70.png",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "id": 73,
+      "file_name": "71.png",
       "width": 1920,
       "height": 1080
     }
@@ -850,19 +850,6 @@
         57
       ],
       "area": 10716,
-      "iscrowd": 0
-    },
-    {
-      "id": 35,
-      "image_id": 20,
-      "category_id": 35,
-      "bbox": [
-        1795,
-        833,
-        103,
-        31
-      ],
-      "area": 3193,
       "iscrowd": 0
     },
     {
@@ -1839,6 +1826,19 @@
       ],
       "area": 12190,
       "iscrowd": 0
+    },
+    {
+      "id": 111,
+      "image_id": 73,
+      "category_id": 111,
+      "bbox": [
+        1795,
+        837,
+        101,
+        29
+      ],
+      "area": 2929,
+      "iscrowd": 0
     }
   ],
   "categories": [
@@ -2010,11 +2010,6 @@
     {
       "id": 34,
       "name": "地狱EX",
-      "supercategory": ""
-    },
-    {
-      "id": 35,
-      "name": "开始委托",
       "supercategory": ""
     },
     {
@@ -2390,6 +2385,11 @@
     {
       "id": 110,
       "name": "20-10",
+      "supercategory": ""
+    },
+    {
+      "id": 111,
+      "name": "离线委托",
       "supercategory": ""
     }
   ]

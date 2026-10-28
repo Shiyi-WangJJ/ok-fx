@@ -47,6 +47,32 @@ class WeeklyTask(BaseTask):
             self.sleep(0.3)
         return False
 
+    def _is_home(self) -> bool:
+        """主页判定：底部能看到商店按钮"""
+        try:
+            return self.find_one("商店") is not None
+        except ValueError:
+            return False
+
+    def _back_to_home(self, max_rounds: int = 20) -> bool:
+        """固定回主页流程：商店可见 → 完成；否则依次 关弹窗 / 点主页按钮 / 点左上返回箭头。
+        返回是否真的回到了主页。"""
+        for _ in range(max_rounds):
+            if self.exit_is_set():
+                return False
+            if self._is_home():
+                self.log_info("  商店可见，已在主页")
+                return True
+            if self._find_and_tap("主页") or self._find_and_tap("点击继续"):
+                self.sleep(1)
+                continue
+            og.device_manager.shell("input tap 355 59")
+            self.sleep(1)
+        if self._is_home():
+            return True
+        self.log_info("  回主页超时")
+        return False
+
     def _find_and_tap_current_level(self, timeout: float = 10) -> bool:
         """边点空位置边扫描锁定卡，找到后左偏一格点击要打的关卡"""
         self.log_info("扫描锁定关卡...")
@@ -264,18 +290,11 @@ class WeeklyTask(BaseTask):
         self.log_info(f"  空点击坐标: ({EMPTY_CLICK[0]}, {EMPTY_CLICK[1]})")
         self.log_info("")
 
-        # 确认在主页
+        # 开头：不在主页先走固定回主页流程，回不去就不继续往下打
         self.log_info("确认主页...")
-        for _ in range(10):
-            if self.exit_is_set():
-                return
-            try:
-                self.find_one("商店")
-                self.log_info("  商店可见，已在主页")
-                break
-            except ValueError:
-                og.device_manager.shell("input tap 355 59")
-                self.sleep(1)
+        if not self._back_to_home():
+            self.log_info("  回主页失败，任务不继续")
+            return
 
         # 1. 活动
         self.log_info("")
