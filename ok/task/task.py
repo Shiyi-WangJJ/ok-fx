@@ -1299,6 +1299,9 @@ class BaseTask(OCR):
         pass
 
     def disable(self):
+        if self._enabled:
+            import traceback
+            logger.debug(f'disable() called on {self.name}, stack:\n' + ''.join(traceback.format_stack(limit=8)))
         self._enabled = False
         self.executor.remove_onetime_task(self)
         communicate.task.emit(self)
