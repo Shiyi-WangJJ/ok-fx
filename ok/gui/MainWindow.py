@@ -533,9 +533,12 @@ class MainWindow(FluentWindow):
                     logger.error(f'Error importing .okscript file: {e}')
 
     def _schedule_auto_start_tasks(self, args):
-        """启动后自动执行 launch 配置里的 auto_start_tasks（默认一条龙）"""
+        """启动后自动执行 launch 配置里的 auto_start_tasks（默认一条龙，仅发布版生效）"""
         if (args.get('task') or 0) > 0:
             logger.info('skip auto start tasks because a task is specified by command line')
+            return
+        if self.config.get('debug') and not self.config.get('auto_start_in_debug', False):
+            logger.info('debug mode, skip auto start tasks')
             return
         names = self.config.get('auto_start_tasks') or []
         if not names:
