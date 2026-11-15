@@ -407,6 +407,24 @@
       "file_name": "71.png",
       "width": 1920,
       "height": 1080
+    },
+    {
+      "id": 74,
+      "file_name": "72.png",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "id": 75,
+      "file_name": "73.png",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "id": 76,
+      "file_name": "74.png",
+      "width": 1920,
+      "height": 1080
     }
   ],
   "annotations": [
@@ -850,6 +868,19 @@
         57
       ],
       "area": 10716,
+      "iscrowd": 0
+    },
+    {
+      "id": 35,
+      "image_id": 74,
+      "category_id": 35,
+      "bbox": [
+        679,
+        482,
+        569,
+        49
+      ],
+      "area": 27881,
       "iscrowd": 0
     },
     {
@@ -1839,6 +1870,32 @@
       ],
       "area": 2929,
       "iscrowd": 0
+    },
+    {
+      "id": 112,
+      "image_id": 75,
+      "category_id": 112,
+      "bbox": [
+        707,
+        655,
+        305,
+        103
+      ],
+      "area": 31415,
+      "iscrowd": 0
+    },
+    {
+      "id": 113,
+      "image_id": 76,
+      "category_id": 113,
+      "bbox": [
+        1739,
+        869,
+        170,
+        109
+      ],
+      "area": 18530,
+      "iscrowd": 0
     }
   ],
   "categories": [
@@ -2010,6 +2067,11 @@
     {
       "id": 34,
       "name": "地狱EX",
+      "supercategory": ""
+    },
+    {
+      "id": 35,
+      "name": "争锋进入失败",
       "supercategory": ""
     },
     {
@@ -2390,6 +2452,16 @@
     {
       "id": 111,
       "name": "离线委托",
+      "supercategory": ""
+    },
+    {
+      "id": 112,
+      "name": "竞技普通",
+      "supercategory": ""
+    },
+    {
+      "id": 113,
+      "name": "竞技起航",
       "supercategory": ""
     }
   ]

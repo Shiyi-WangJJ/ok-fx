@@ -517,31 +517,189 @@ class DailyOrchestrator(BaseTask):
     # 出击 → 竞技
     # ==================================================================
 
+    # 竞技对手卡片：固定三行，内容每次「换一批」都会变，只能按坐标点
+    ARENA_ROWS = [(1400, 280), (1400, 456), (1400, 628)]
+    ARENA_MAX_ROUNDS = 10      # 只防死循环，正常靠「次数=0」结束
+    ARENA_BATTLE_TIMEOUT = 360 # 一场战斗最多等 6 分钟（含加载/结算/奖励）
+    ARENA_LIST_RETRY = 15      # 打完回列表后，最多再等 15×2=30 秒把次数读出来
+
     def do_arena(self):
-        """出击→竞技→[争锋/普通]→等20s→回主页"""
+        """出击→竞技→[争锋/常规]→按可挑战次数选对手打→回主页
+
+        争锋竞技未开放时（游戏弹「争锋进入失败」系统提示）自动降级为常规线路，
+        并把「竞技线路」持久化成 普通，下次直接走常规。
+        """
         mode = self.config.get("竞技线路", "争锋")
         self.log_info(f"--- 出击-竞技 ({mode}) ---")
-        if mode == "普通":
-            self.log_info("普通线路占位，跳过")
-            return
-        for name in ["出击", "竞技", "争锋竞技", "无畏舰队"]:
+        for name in ["出击", "竞技"]:
             if self.exit_is_set():
                 return
             self.log_info(f"  >> {name}")
             if not self._poll_and_tap(name, 10):
-                self.log_info(f"    {name} 未找到")
-            elif name == "无畏舰队":
-                self.sleep(0.5)
-                for _ in range(10):
-                    if self._find_and_tap("确定"):
-                        self.log_info("    已点击确定")
-                        break
-                    self.sleep(0.3)
+                self.log_info(f"    {name} 未找到，退出竞技")
+                self._go_home()
+                return
 
-        self.log_info("  等待战斗结束 (20s)...")
-        self.sleep(20)
+        if mode == "争锋" and self._enter_zhengfeng():
+            pass    # 成功进入争锋
+        elif not self._enter_normal_arena():
+            self.log_info("    常规竞技 未找到，退出竞技")
+            self._go_home()
+            return
+
+        if self.exit_is_set():
+            return
+        self._arena_loop()
         self._go_home()
         self.log_info("--- 出击-竞技完成 ---")
+
+    def _enter_zhengfeng(self) -> bool:
+        """进入争锋竞技。返回 True=已进入；False=未开放/没找到（需改走常规）"""
+        self.log_info("  >> 争锋竞技")
+        if not self._poll_and_tap("争锋竞技", 10):
+            self.log_info("    争锋竞技 未找到")
+            return False
+
+        # 争锋没开放时游戏会弹「争锋进入失败」的系统提示
+        for _ in range(10):
+            if self.exit_is_set():
+                return False
+            if self._find_one_safe("争锋进入失败") is not None:
+                self.log_info("    争锋竞技暂未开放（检测到系统提示），改走常规线路")
+                for _ in range(10):
+                    if self._find_and_tap("确定"):
+                        self.log_info("    已关闭系统提示")
+                        break
+                    self.sleep(0.3)
+                if self.config.get("竞技线路") != "普通":
+                    self.config["竞技线路"] = "普通"
+                    self.log_info("    竞技线路已切换为：普通（常规）")
+                return False
+            self.sleep(0.5)
+        return True
+
+    def _enter_normal_arena(self) -> bool:
+        """进入常规竞技：优先匹配已有的「竞技普通」卡片模板，其次 OCR 找「常规」"""
+        self.log_info("  >> 常规竞技")
+        if self._poll_and_tap("竞技普通", 10):
+            return True
+
+        for _ in range(10):
+            if self.exit_is_set():
+                return False
+            try:
+                boxes = self.ocr(match=re.compile("常规"))
+            except Exception as e:
+                self.log_info(f"    OCR 失败: {e}")
+                boxes = []
+            if boxes:
+                box = boxes[0]
+                cx, cy = box.x + box.width // 2, box.y + box.height // 2
+                self.log_info(f"    [常规] {box.name} @ ({cx},{cy})")
+                self.click_box(box)
+                self.sleep(1)
+                return True
+            self.sleep(0.5)
+        return False
+
+    def _ocr_all(self):
+        """整屏 OCR 一次，返回全部 Box（避免一轮里反复 OCR）"""
+        try:
+            return self.ocr()
+        except Exception as e:
+            self.log_info(f"    OCR 失败: {e}")
+            return []
+
+    @staticmethod
+    def _parse_arena_times(boxes):
+        for b in boxes:
+            if "本次可挑战次数" in (b.name or ""):
+                m = re.search(r"(\d+)\s*/\s*(\d+)", b.name)
+                if m:
+                    return int(m.group(1)), int(m.group(2))
+        return None, None
+
+    def _arena_times(self, attempts=3):
+        """OCR 读竞技页「本次可挑战次数 x/y」，返回 (剩余, 上限)"""
+        left, cap = None, None
+        for _ in range(max(1, attempts)):
+            if self.exit_is_set():
+                return None, None
+            left, cap = self._parse_arena_times(self._ocr_all())
+            if left is not None:
+                return left, cap
+            self.sleep(1.5)
+        return left, cap
+
+    def _arena_loop(self):
+        """打竞技直到 OCR 读到「本次可挑战次数 0/x」
+
+        唯一结束条件是次数归零（读不到次数才降级为放弃）；ARENA_MAX_ROUNDS 只是防死循环的安全上限。
+        """
+        played = 0
+        for _round in range(self.ARENA_MAX_ROUNDS):
+            if self.exit_is_set():
+                return
+            left, cap = self._arena_times()
+            if left is None:
+                # 可能刚回列表还没刷出来，等一会儿再读，别直接放弃
+                for _ in range(self.ARENA_LIST_RETRY):
+                    self.sleep(2)
+                    left, cap = self._arena_times(attempts=1)
+                    if left is not None:
+                        break
+                if left is None:
+                    self.log_info("    读不到「本次可挑战次数」，跳过竞技")
+                    return
+            self.log_info(f"    本次可挑战次数 {left}/{cap}")
+            if left <= 0:
+                self.log_info("    可挑战次数已用完")
+                break
+            if not self._arena_fight(self.ARENA_ROWS[played % len(self.ARENA_ROWS)]):
+                break
+            played += 1
+        self.log_info(f"    竞技共打 {played} 场")
+
+    def _arena_fight(self, pos) -> bool:
+        """点一行对手 → 竞技起航 → 打完并点掉「点击继续」→ 直到回到竞技列表"""
+        self.log_info(f"  >> 选对手 ({pos[0]},{pos[1]})")
+        og.device_manager.shell(f"input tap {pos[0]} {pos[1]}")
+        self.sleep(1.5)
+        if not self._poll_and_tap("竞技起航", 15):
+            self.log_info("    没进到编队页（未找到 竞技起航）")
+            return False
+
+        self.log_info("    战斗中...")
+        result = None
+        for _ in range(self.ARENA_BATTLE_TIMEOUT // 3):
+            if self.exit_is_set():
+                return False
+            self.sleep(3)
+            boxes = self._ocr_all()
+            names = [b.name or "" for b in boxes]
+            # 载入过场那句「…是获得战斗胜利的关键。」含"胜利"二字，先排除
+            if any("载入舰队中" in n for n in names):
+                continue
+            # 真正的 胜利/失败 是大字，小字号的长句不算
+            if result is None:
+                for b in boxes:
+                    if b.height >= 80 and re.search(r"胜利|失败", b.name or ""):
+                        result = b.name
+                        self.log_info(f"    战斗结果: {result}")
+                        break
+            # 胜利页/奖励页都有「点击继续」，点掉
+            cont = [b for b in boxes if "点击继续" in (b.name or "")]
+            if cont:
+                self.click_box(cont[0])
+                self.sleep(2)
+                continue
+            # 能读到次数 = 已回到竞技列表
+            left, _cap = self._parse_arena_times(boxes)
+            if left is not None:
+                self.log_info(f"    回到竞技列表（剩余 {left} 次）")
+                return True
+        self.log_info("    战斗超时未结束")
+        return False
 
     # ==================================================================
     # 远征
